@@ -65,20 +65,19 @@
         <form action="">
             <fieldset>
                 <div>
-                    <label for="missions">Missions (in order, comma separated):</label>
-                    <input id="missions" name="missions" type="input">
-                </div>
-                <div>
-                    <label for="missions">Completed (in order, comma separated):</label>
-                    <input id="missions" name="missions" type="input">
+                    <label for="input">Paste excel rows:</label>
+                    <textarea id="input" name="input" cols="1000" rows="10"></textarea>
                 </div>
                 <div>
                     <button type="submit">Format</button>
                 </div>
+                <div>
+                    <label for="output">Copy from here:</label>
+                    <textarea id="output" name="output" cols="1000" rows="10"></textarea>
+                </div>
             </fieldset>
         </form>
     </body>
-    <script src="https://gist.githubusercontent.com/ianchanning/41a637174824c377f8a6b28ce4cd7663/raw/b3023db2e20b42f41daaada2899203f72b5f02c6/index.js"></script>
     <script>
         const params = (new URL(document.location)).searchParams
         document.getElementById('output').value = params.get('input').replace(/\t+/g, ' ')
