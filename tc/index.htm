@@ -81,8 +81,8 @@
     <script src="index.js"></script>
     <script>
         const params = (new URL(document.location)).searchParams
+        console.log({params});
         if (params.length > 0) {
-            console.log({params});
             console.log(missions(params.get('missions').split(','), params.get('completed').split(',')));
             // document.getElementById('output').value = params.get('input').replace(/\t+/g, ' ')
         }
