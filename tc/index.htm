@@ -62,6 +62,8 @@
     </head>
     <body>
         <h1>WTF Tacticool missions</h1>
+        <p>Available missions:</p>
+        <p>B.S.S., Basic Mission, Bayonet, Breach, Cleanup, Common Only, Cover, Hammer, HILDR, Knife, Locals, Logistics, Rare Only, Recon, Showdown, Uncommon Only</p>
         <form action="">
             <fieldset>
                 <div>
@@ -77,19 +79,24 @@
                 </div>
             </fieldset>
         </form>
+        <pre id="output"></pre>
     </body>
     <script src="index.js"></script>
     <script>
         (() => {
             const params = (new URL(document.location)).searchParams
-            console.log({params});
+            document.getElementById('missions').value = params.get('missions');
+            document.getElementById('completed').value = params.get('completed');
             if (!params.get('missions')) {
                 return;
             }
-            console.log(missions(
-                params.get('missions').split(','), 
-                params.get('completed') && params.get('completed').split(',')
-            ));
+            const names = params.get('missions').split(',');
+            const completed = params.get('completed').length > 0 ? params.get('completed').split(',') : []
+            const rawMessage = missions(
+                names,
+                completed
+            );
+            document.getElementById('output').innerText = message(rawMessage, completed);
             // document.getElementById('output').value = params.get('input').replace(/\t+/g, ' ')
         })();
     </script>
