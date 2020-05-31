@@ -69,8 +69,8 @@
                     <input id="missions" name="missions" type="input">
                 </div>
                 <div>
-                    <label for="missions">Completed (in order, comma separated):</label>
-                    <input id="missions" name="missions" type="input">
+                    <label for="completed">Completed (in order, comma separated):</label>
+                    <input id="completed" name="completed" type="input">
                 </div>
                 <div>
                     <button type="submit">Format</button>
@@ -80,7 +80,11 @@
     </body>
     <script src="index.js"></script>
     <script>
-        // const params = (new URL(document.location)).searchParams
-        // document.getElementById('output').value = params.get('input').replace(/\t+/g, ' ')
+        const params = (new URL(document.location)).searchParams
+        if (params.length > 0) {
+            console.log({params});
+            console.log(missions(params.get('missions').split(','), params.get('completed').split(',')));
+            // document.getElementById('output').value = params.get('input').replace(/\t+/g, ' ')
+        }
     </script>
 </html>
