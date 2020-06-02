@@ -185,6 +185,9 @@ const missions = (names, completedNames = []) => {
 };
 
 const message = (rawMessage, completedNames) => {
+  if (!Array.isArray(rawMessage)) {
+    return rawMessage;
+  }
   const upperComplete = clean(completedNames).map((x) => (x.toUpperCase()));
   const missionMessage = Array.isArray(rawMessage) && rawMessage.reduce((acc, x, i) => {
     const [head, ...tail] = x;
