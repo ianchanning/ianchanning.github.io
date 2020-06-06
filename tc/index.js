@@ -21,10 +21,47 @@ const raw = {
 };
 
 
-// handle spaces and ignore case
-// also need to handle duplicates and misspellings
-const clean = (list) => (list.map((x) => (x.trim())).filter((x) => (x)));
+/**
+ * Replace expected misspellings with correct names
+ *
+ * @param {string} x Mission name
+ * @returns {string} Correct mission name
+ */
+const fixSpelling = (x) => {
+  // remove all dots from B.S.S.
+  switch (x.toUpperCase().replace(/\./g, '')) {
+    case 'BSS':
+      return 'B.S.S.';
+    case 'COMMON':
+    case 'UNCOMMON':
+    case 'RARE':
+      return `${x} Only`;
+    case 'BASIC':
+      return `${x} Mission`;
+    case 'LOCAL':
+    case 'LOGISTIC':
+      return `${x}s`;
+    case 'CLEAN':
+      return `${x}up`;
+    default:
+      return x;
+  }
+};
 
+/**
+ * Handle spaces, case and misspellings
+ *
+ * @param {[string]} list Mission names
+ * @returns {[string]} Cleaned mission names
+ */
+const clean = (list) => (list.map((x) => (fixSpelling(x.trim()))).filter((x) => (x)));
+
+/**
+ * Check if we can find the missions
+ *
+ * @param {[string]} cleanList Cleaned Mission names
+ * @returns {[string]} Mission names that are not found in the raw data
+ */
 const check = (cleanList) => (cleanList.filter((x) => (
   !raw.data.find((y) => (y[0].toUpperCase() === x.toUpperCase()))
 )));
@@ -36,6 +73,7 @@ const check = (cleanList) => (cleanList.filter((x) => (
  * @param {[string]} completedNames=[] Ordered list of completed mission names
  * @returns {Array} Missions rows with names of each operator for each mission
  */
+// eslint-disable-next-line no-unused-vars
 const missions = (names, completedNames = []) => {
   /**
    * Helper function that ignores first column
@@ -184,17 +222,32 @@ const missions = (names, completedNames = []) => {
   );
 };
 
+/**
+ * Formatted missions message
+ *
+ * @param {[[string]]|string} rawMessage Ordered list of each mission operators or error message
+ * @param {[string]} completedNames=[] Ordered list of completed mission names
+ * @returns {string} Message to post to discord chat and in game chat
+ */
+// eslint-disable-next-line no-unused-vars
 const message = (rawMessage, completedNames) => {
   if (!Array.isArray(rawMessage)) {
     return rawMessage;
   }
   const upperComplete = clean(completedNames).map((x) => (x.toUpperCase()));
-  const missionMessage = Array.isArray(rawMessage) && rawMessage.reduce((acc, x, i) => {
+  const missionValue = (isComplete, list) => {
+    if (isComplete) {
+      return 'Completed';
+    }
+    const nonEmpty = list.filter((y) => (y));
+    return nonEmpty.length === 0 ? 'No Operators' : nonEmpty.join(' ');
+  };
+  const missionMessage = rawMessage.reduce((acc, x, i) => {
     const [head, ...tail] = x;
     const isComplete = upperComplete.includes(head.toUpperCase());
     return `${acc}
 
-Mission ${i + 1} (${head}): ${isComplete ? 'Completed' : tail.filter((y) => (y)).join(' ')}`;
+Mission ${i + 1} (${head}): ${missionValue(isComplete, tail)}`;
   }, '');
 
   return `${missionMessage}
