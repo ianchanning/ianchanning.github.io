@@ -1,0 +1,110 @@
+BODY
+{
+	font-family: arial;
+	xfont-size: 10pt;
+	background-color:black;
+}
+
+A
+{
+
+}
+
+A:hover
+{
+}
+
+A:visited
+{
+
+}
+
+div.headLogo, div.headName, div.headContact
+{
+	position: absolute;
+}
+
+div.headLogo
+{
+	top: 3em;
+	left: 0.5em;
+}
+
+div.headName
+{
+	top: 1em;
+	left: 1em;
+}
+
+div.headContact
+{
+	top: 15em;
+	left: 1em;
+}
+
+div.headMenu
+{
+}
+
+div.head, div.main, div.foot, div.headMenu
+{
+	margin-left:10em;
+	background-color:#222;
+	color:white;
+}
+
+div.head
+{
+}
+
+div.main
+{
+	padding-top: 5.0em;
+}
+
+div.foot
+{
+}
+
+.headAboutUs, .headTechnology, .headQuestions, .headHome
+{
+	font-weight: bold;
+}
+
+.selected
+{
+}
+
+H2
+{
+	background-color: black;
+	color: white;
+}
+
+H1
+{
+}
+
+ACRONYM, .abbr
+{
+}
+
+TABLE, TD, TH
+{
+}
+
+P, div.caption, div.content
+{
+	width: 23em;
+	text-align: justify;
+	padding-left: 0.4em;
+	border-left: 0.1em solid orange;
+}
+
+.caption
+{
+}
+
+.figure
+{
+}

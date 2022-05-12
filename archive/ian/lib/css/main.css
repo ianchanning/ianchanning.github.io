@@ -1,0 +1,181 @@
+body
+{
+	/*background-color: #69001e;
+	margin-top: 0;
+	margin-bottom: 0em;*/
+	/*text-align: center*/
+	font-size:100%;
+	line-height:1.25em;
+	
+}
+
+a
+{
+	color: #f60;
+}
+
+a:visited
+{
+	color:#960;
+}
+
+img
+{
+}
+
+h1, h2, h3, #navbar
+{
+	font-family: palatino linotype, georgia, serif;
+	font-weight: normal;
+}
+
+h1
+{
+	color: silver;
+}
+
+h2
+{
+	/*xcolor: white;
+	xbackground-color: silver;
+	xtext-transform: uppercase; */
+	margin-bottom: 0;
+}
+
+div.header
+{
+	/*xtext-align: left;
+	xwidth: 50em;
+	xmargin: 0 auto;
+	xposition: absolute;
+	xleft: 0em;
+	xtop: 0em;
+	xmargin-left: 2em;
+	xmargin-top: 0.5em;
+	xpadding-top: 0em;
+	xborder: 1px solid black;
+	font-weight: normal;*/
+}
+
+div.main
+{
+	/*xtext-align: left;
+	xwidth: 50em;
+	xmargin: 0 auto;
+	xwidth: 50em;
+	xmargin-left: 2em;
+	xmargin-right: 1em;
+	xmargin-top: 0em;
+	xmargin-bottom: 0em;*/
+	/*border-left: 1px solid #ec6d7f;
+	border-right: 1px solid #ec6d7f;*/
+	/*top right bottom left
+	xpadding: 0.5em 0.5em 1em 0.5em;
+	xbackground-color: white;*/
+}
+
+.header h1.title
+{
+	/*xcolor: white;
+	xborder: 1px solid #FF6600;*/
+	font-size: 3em;
+}
+
+.header img
+{
+	border: 0;
+}
+
+.header h1
+{
+	/*xfont-weight: normal;
+	xfont-family: tahoma, sans serif;
+	xborder-bottom: 5px solid #333;
+	xbackground-color: transparent;
+	xcolor: #ec6d7f;*/ /*pink*/
+}
+
+.header h1
+{
+	/*xletter-spacing: 20px;
+	xfont-size: 2em;*/ /*18px;*/
+}
+
+.header h2
+{
+	/*xfont-size: 1.25em;
+	xfont-weight: normal;
+	xletter-spacing: 8px;
+	xcolor: #ec6d7f;*/ /*pink*/
+}
+
+
+.main p, .main li {
+    /*font-size:1.25em;*/
+}
+
+ul, ol, p, blockquote
+{
+	text-align: left;
+	/*background-color: white;*/
+	font-family: sans-serif;
+	font-size: 0.75em;
+
+}
+
+p.caption
+{
+	/*xtext-align: center;*/
+}
+
+p a, li a
+{
+	color: #f60;
+}
+
+.links, #navbar li
+{
+	font-size: 1.25em;
+}
+
+/* AListApart code */
+#navbar {
+	height: 1.66em;
+	padding: 0 0 0 0px;
+	color: black;
+	border-top: 1px solid #f60;
+	font-size: 1.125em;
+	/*font-family: serif;*/
+	overflow: hidden;
+	/*xmin-width: 750px;
+	xfont-weight: bold;*/
+	margin: -0.4em 0 1.4em 0;
+	
+}
+#navbar li 
+{
+	float: left; 
+	padding: 0px 10px 0px 0px; 
+	/*xmargin-right: 5px;*/
+	list-style-type: none;
+	text-transform: uppercase; 
+	color: #f60;
+}
+#navbar li a, #navbar li.selected  
+{
+	/*xdisplay: block; 
+	xtext-transform: uppercase; 
+	xcolor: white;*/
+	color: black;
+}
+
+#navbar li a:visited
+{
+	color: black;
+}
+
+#navbar li a:hover
+{
+	/*xtext-decoration: underline;*/
+}
+

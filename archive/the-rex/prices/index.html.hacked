@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta name="generator" content=
+      "HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <link rel="stylesheet" type="text/css" href="../lib/css/main.css" />
+      <title>
+         Ticket Prices (The Rex Cinema)
+      </title>
+   </head>
+   <body>
+      <div class="header">
+			<script src="../lib/javascript/header.js" type="text/javascript"><!-- --></script>
+			<noscript>
+			<h1 class="title">
+				THE REX
+			</h1>
+			<h2 class="subtitle1">
+				CINEMA
+			</h2>
+			<h2 class="subtitle2">
+				BERKHAMSTED
+			</h2>
+			<h2 class="subtitle3">
+				www.therexcinema.com
+			</h2>
+			</noscript>
+      </div>
+      <div class="main">
+         <ul id="navbar">
+            <li>
+               <a href="/the-rex/" title="Home">HOME</a>
+            </li>
+            <li>
+               <a href="/the-rex/programme/" title="Programme">PROGRAMME</a>
+            </li>
+            <li>
+               PRICES
+            </li>
+            <li>
+               <a href="/the-rex/photos/" title="Photos">PHOTOS</a>
+            </li>
+            <li>
+               <a href="/the-rex/membership/" title="Membership">MEMBERSHIP</a>
+            </li>
+            <li>
+               <a href="/the-rex/merchandise/" title="Merchandise">MERCHANDISE</a>
+            </li>
+            <li>
+               <a href="/the-rex/about/" title="About">ABOUT</a>
+            </li>
+            <li>
+               <a href="/the-rex/contact/" title="Contact">CONTACT</a>
+            </li>
+         </ul>
+         <h1>
+            Ticket Prices
+         </h1>
+         <table summary="Ticket prices by area">
+            <caption>
+               Ticket prices by area
+            </caption>
+            <tbody>
+               <tr>
+                  <th scope="row" id="arearow1">
+                     Circle
+                  </th>
+                  <td>
+                     &pound;7.00
+                  </td>
+                  <td>
+                     &pound;5.50 (Members &amp; concessions)
+                  </td>
+               </tr>
+               <tr>
+                  <th scope="row" id="arearow2">
+                     Tables *
+                  </th>
+                  <td>
+                     &pound;9.00
+                  </td>
+                  <td>
+                     &pound;7.50 (Members &amp; concessions)
+                  </td>
+               </tr>
+               <tr>
+                  <th scope="row" id="arearow3">
+                     Royal Box (seats 6)
+                  </th>
+                  <td>
+                     &pound;11.00
+                  </td>
+                  <td>
+                     &pound;60.00 (for the box)
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+			<p>* - Drinks available for tables throughout the performance.</p>
+         <h2>
+            Rex Random Raffle
+         </h2>
+         <p>
+            On Sell Out nights we open a waiting list 30 minutes before the start time for those
+            who just want to try their luck on the door. We will issue each party with a raffle
+            ticket and just before the film starts we draw the tickets out of a hat and sell off
+            any seats left over. There is a good chance of getting in this way but it is not
+            guaranteed. You do not need to arrive 30 mins early as it is a lottery and therefore
+            you have as much chance of getting a ticket if you arrive 10 mins before the film.
+         </p>
+         <h2>
+            Terms and Conditions
+         </h2>
+         <ol>
+            <li>There is a credit/debit card booking fee of 50p <strong>per transaction</strong>
+            (not per ticket).
+            </li>
+            <li>All advanced bookings must be collected by <strong>15 mins</strong> after the time
+            printed in the programme, after which they may be released for re-sale.
+            </li>
+            <li>There is a charge of &pound;1.00 for any <strong>changes</strong> made to tickets
+            or seats.
+            </li>
+            <li>If you have booked to see a film but are unable to come please give us at least
+            <strong>48 hours notice</strong> so that we can re-sell your tickets and offer you
+            vouchers to see another performance (valid for 3 months). Unfortunately we are unable
+            to offer vouchers if given less than 48 hours notice.
+            </li>
+         </ol>
+         <table summary="Box office details">
+            <caption>
+               Box Office
+            </caption>
+            <tbody>
+               <tr>
+                  <th scope="row" id="row1">
+                     Telephone:
+                  </th>
+                  <td>
+                     (01442) 877 759
+                  </td>
+               </tr>
+               <tr>
+                  <th scope="row" id="row2">
+                     Opening hours:
+                  </th>
+                  <td>
+                     10.30am-6.00pm (Monday-Saturday), 4.30pm-5.30pm (Sunday)
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </body>
+</html>

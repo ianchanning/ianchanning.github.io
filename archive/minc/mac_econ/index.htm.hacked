@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta name="generator" content="HTML Tidy for Windows (vers 12 April 2005), see www.w3.org" />
+        <title>Minc - Macro Project</title>
+        <link href="../Lib/minc.css" type="text/css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="main">
+			<div class="leftPanel">
+				<div class="homeMenu">
+					<div class="home"><a href="../index.htm"><img id="header1" src="../Lib/minc_headerI.gif" alt="minc" class="noBorder"/></a></div>
+					<div class="title"><h2>The end of Imperial</h2></div>
+				</div>
+				<div class="navigationMenu">
+					<div class="end"><h2>Navigation</h2></div>
+					<div class="quickLinks">
+						<dl>
+							<dd class="subMenu">
+								<a href="applet/display.htm">Applet</a>
+							</dd>
+						</dl>
+					</div>
+				</div>
+				<div class="rightMenu">
+					<div class="end"><h2>Quick Links</h2></div>
+					<div class="quickLinks">
+						<dl>
+							<dd>
+							<h3>economics</h3>
+							</dd>
+							<dd>
+							<a href="http://www.buysignals.com/members/index2.htm">buy signals</a>
+							</dd>
+							<dd>
+							<a href="http://nova.umuc.edu/~black/pageg.html">economics net text-book</a>
+							</dd>
+							<dd>
+							<a href="http://www.econtech.com.au">econtech</a>
+							</dd>
+							<dd>
+							<a href="http://www.factset.com">factset</a>
+							</dd>
+							<dd>
+							<a href="http://www.investment-guide.com">investment guide</a>
+							</dd>
+						</dl>
+					</div>
+					<div class="quickLinks">
+						<dl>
+							<dd>
+							<h3>code</h3>
+							</dd>
+							<dd>
+							<a href="http://www.afu.com/applets.html">afu - Applets</a>
+							</dd>
+							<dd>
+							<a href="http://www.realapplets.com/tutorial/">Applet Tutorial</a>
+							</dd>
+							<dd>
+							<a href="http://www.javasource.org/GifServlet/">Gif servlet</a>
+							</dd>
+							<dd>
+							<a href="http://info.internet.isi.edu/in-notes/rfc/files/rfc2068.txt">HTTP</a>
+							</dd>
+							<dd>
+							<a href="http://www.doc.ic.ac.uk/lab/cplus/java/">Java API</a>
+							</dd>
+							<dd>
+							<a href="http://java.sun.com/people/linden/faq_c.html#Applets">Servlet Info</a>
+							</dd>
+							<dd>
+							<a href="http://www.skyviewcafe.com/skyview.shtml">Skyview Applet</a>
+							</dd>
+							<dd>
+							<a href="http://www.w3.org/TR/html401/">W3 - HTML</a>
+							</dd>
+						</dl>
+					</div>
+					<div class="quickLinks">
+						<dl>
+							<dd>
+							<h3>forecasting</h3>
+							</dd>
+							<dd>
+							<a href="http://www.met.rdg.ac.uk/cag/forecasting/">Climate Analysis Group</a>
+							</dd>
+							<dd>
+							<a href="http://fairmodel.econ.yale.edu/">Fairmodel</a>
+							</dd>
+							<dd>
+							<a href="http://www.hhs.se/personal/Psoderlind/Classes/ForeCast.htm">Forecasting links</a>
+							</dd>
+							<dd>
+							<a href="http://www.statistics.gov.uk/">Government Stats</a>
+							</dd>
+							<dd>
+							<a href="http://www.hm-treasury.gov.uk/economic_data_and_tools/forecast_for_the_uk_economy/data_forecasts_index.cfm">UK Economy</a>
+							</dd>
+						</dl>
+					</div>
+				</div>
+			</div>
+			<div class="centrePanel">
+				<div class="topMenu">
+					<div class="title"><h2>
+					<a href="../index.htm">Home</a>
+					| Macro Project</h2></div>
+					<div class="heading"><h1>Macroeconomics Project</h1></div>
+				</div>
+				<div class="content">
+					<table cellspacing="0" cellpadding="0" class="defaultHeight">
+						<tr>
+							<td>
+								<br />
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<a href="applet/display.htm">Display Applet</a>
+							</td>
+						</tr>
+						<tr>
+							<td class="cvSubBody">
+								<a href="applet/display.htm">
+									<img src="../Lib/yingyangiii.gif" alt="yingyang" height="400" width="600" class="noBorder" />
+								</a>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="footer">last modified:
+<script type="text/javascript">
+//<![CDATA[
+												var dateModified = document.lastModified;
+												mydate = dateModified.slice(0,10);
+												document.write( document.lastModified );
+//]]>
+</script>
+				</div>
+			</div>
+        </div>
+    </body>
+</html>

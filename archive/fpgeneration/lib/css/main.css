@@ -1,0 +1,162 @@
+BODY
+{
+	font-family: helvetica, arial, sans-serif;
+	background: #161C25;
+	color: white;
+	font-size:100%;
+	line-height:1.25em;
+	text-align: center;
+}
+
+A
+{
+	color: #f90;
+}
+
+A:hover
+{
+	font-style: normal;
+	text-decoration: none;
+}
+
+A:visited
+{
+	color:#960;
+}
+
+div.headContact
+{
+	border-top: 0.4em solid;
+	border-left: 0.4em solid;
+	border-right: 0.4em solid;
+	border-bottom: 0.4em solid;
+	border-color: white;
+	text-align: center;
+	width: 139px;
+	background-color: white;
+	font-size: 8pt;
+	font-weight: bold;
+}
+
+div.head
+{
+	padding-top: 2em;
+	border-color: black; /*orange;*/
+	text-align: left;
+	width: 33em;
+	margin: 0 auto
+}
+
+div.main
+{
+	padding-top: 2.2em;
+	border-color: black; /*orange;*/
+	text-align: left;
+	width: 33em;
+	margin: 0 auto
+}
+
+div.foot
+{
+	border-left: 0.4em solid white;
+	text-align: left;
+	width: 33em;
+	margin: 0 auto
+}
+
+.headLogo #headName
+{
+	margin-bottom:2px;
+}
+
+#navbar {
+	height: 2.4em;
+	padding: 0 0 0 0;
+	background-color: #161C25;
+	/*border-top: 5px solid #333;*/
+	font-family: Palatino Linotype, Georgia, Times New Roman, serif;
+	overflow: hidden;
+	min-width: 750px;
+	margin: 0 0 0 0;
+}
+#navbar li 
+{
+	float: left; 
+	padding: 5px 23px 10px 13px; 
+	font-size: 0.75em;
+	margin-right: 5px;
+	/*background-color: #333;*/
+	list-style: none;
+}
+#navbar li a, #navbar li.selected  
+{
+	display: block; 
+	text-transform: uppercase; 
+	color: #FFF;
+	font-weight:bold;
+}
+
+#navbar li.selected
+{
+	background-color: #161C25;
+}
+
+H1
+{
+	font-family: Palatino Linotype, Georgia, Times New Roman, serif;
+	font-size: 3em;
+	font-weight: normal;
+	padding: 0 0 0 0;
+	margin: 0.5em 0 1em 0;
+	/*color:#f90;*/
+}
+
+H3
+{
+	color: #960;
+}
+
+ACRONYM, .abbr
+{
+	border-bottom: 1px dotted black;
+}
+
+TABLE, TD, TH
+{
+	border: 1px solid white;
+}
+
+P, div.figureText, LI
+{
+	font-size: 0.75em;
+	/*text-align: justify;*/
+}
+
+.caption
+{
+	font-size: 0.8em;
+}
+
+.figureImage
+{
+	border: 2px solid black;
+}
+
+.firstLetter
+{
+	/*color:#f90;*/
+}
+
+p.tagline
+{
+	line-height: 2.5em;
+	margin: 0 0em 2.5em 2em;
+	
+	
+}
+
+#iecfrontpage
+{
+	float: left;
+	margin-right: 1.5em;
+}

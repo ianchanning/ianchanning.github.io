@@ -1,0 +1,12 @@
+/* Regular */
+/* @link http://css-tricks.com/snippets/css/using-font-face/ */
+@font-face {
+    font-family: 'Raleway';
+    src: url('raleway_thin-webfont.eot'); /* IE9 Compat Modes */
+    src: url('raleway_thin-webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+         url('raleway_thin-webfont.woff') format('woff'), /* Modern Browsers */
+         url('raleway_thin-webfont.ttf') format('truetype'), /* Safari, Android, iOS */
+         url('raleway_thin-webfont.svg#league_gothicregular') format('svg'); /* Legacy iOS */
+    font-weight: normal;
+    font-style: normal;
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+      <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <meta name="keywords" content="fusion,power,generation,nuclear,fission,physics,ITER,MIX,Multi-pole Ion beam eXperiment,IEC,inertial electrostatic confinement,tokamak" />
+      <meta name="description" content="fusion power generation is engaged in the development of nuclear fusion energy." />
+      <link rel="stylesheet" href="lib/css/main.css" type="text/css" /><!-- *** Begin Editable below 'Fusion Power Generation : ' *** -->
+      <title>
+         Fusion Power Generation
+      </title><!-- *** End Editable *** -->
+   </head>
+   <body>
+      <!-- Begin Header -->
+      <div class="head">
+         <!--<div class="headContact">
+            <a href="mailto:info@fpgeneration.com" title="Email us with your questions">Contact us</a>
+         </div>-->
+         <div class="headLogo">
+            <img src="lib/images/fpg_logo6_151x150.png" width="151" height="150" alt="[Fusion Power Generation Logo]" title=
+            "Four arrows pointing in and four arrows pointing out..." />
+            <img id="headName" src="lib/images/fpg_name6_369x48.png" width="369" height="48" alt="[Fusion Power Generation]" />
+         </div>
+         <ul id="navbar">
+			 <li class="headHome selected">fpgeneration.com</li> 
+			 <li class="headAboutUs"><a href="aboutus/index.html" title="Who we are and what we've done">About Us</a></li>
+			 <li class="headTechnology"><a href="technology/index.html" title="Descriptions of the technology">Technology</a></li>
+			 <li class="headQuestions"><a href="questions/index.html" title="Questions and answers about the technology">Questions</a></li>
+         	
+         </ul>
+         
+      </div>
+      <div class="main">
+         <!-- End Header -->
+         <!-- Begin Content -->
+			<img id="iecfrontpage" src="lib/images/iec_250x188.jpg" alt="IEC Plasma" />
+			<p class="tagline">
+				<strong>FPGeneration is engaged in Nuclear Fusion Research. Our focus is on a variant of Inertial Electrostatic Confinement, our goal is development of cheap and simple technology for commercial fusion energy production.</strong>
+			</p>
+         <!--<p>
+            <b>FUSION POWER GENERATION</b> is engaged in the development of <a href="questions/index.html#question1" title="Questions - Nuclear Fusion">nuclear fusion</a> energy. The company, formed
+            by a successful <a href="aboutus/index.html#terricarrmuran" title="About us - Terri Carr Muran">entrepreneur</a> and two recent <a href="aboutus/index.html#alexklein" title=
+            "About us - Alex Klein &amp; Matthew Whitman">PhDs</a> from Columbia's applied mathematics department, has a patent for a novel type of <a href="technology/index.html#mix" title=
+            "Technology - Multi-pole Ion beam eXperiment">fusion reactor</a>, and is currently raising money for an experimental campaign to demonstrate the feasibility of its technology.
+         </p>-->
+         <h2>
+            Our Technology
+         </h2>
+         <h3>
+            Inertial Electrostatic Confinement
+         </h3>
+         <p>
+            <a href="technology/index.html#iec" title="Technology - Inertial Electrostatic Confinement">IEC</a> promises a cheap, simple approach to commercial fusion power generation that could be
+            developed much, much faster on a modest budget, as compared with a complex, expensive multinational project such as <a href="http://www.iter.org/" title="External Link - iter.org">ITER</a>.
+         </p>
+         <h3>
+            Multi-pole Ion beam eXperiment
+         </h3>
+         <p>
+            By adding a particular type of magnetic field to a traditional spherical IEC machine called <a href="technology/index.html#mix" title="Technology - Multi-pole Ion beam eXperiment">MIX</a>
+            , using a shaped electromagnet which doubles as the accelerating cathode, we are able to dramatically lower the losses of energetic ions that limit the efficiency of traditional designs.
+         </p>
+         <h2>
+            We plan to
+         </h2>
+         <div class="content">
+            <ul>
+               <li>Construct a magnetic <a href="technology/index.html#iec">IEC</a> device, called <a href="technology/index.html#mix" title="Technology - Multi-pole Ion beam eXperiment">MIX</a> for
+               Multi-pole Ion beam eXperiment. Once funding is obtained construction should take no more than 12 months.
+               </li>
+               <li>Fully explore the fusion potential of MIX by installing several state of the art, high temperature plasma diagnostics.
+               </li>
+               <li>Simultaneously develop computer models which will guide us in search of the region in parameter space which maximizes fusion power, and efficiency.
+               </li>
+               <li>Demonstrate fusion rates consistent with fusion power output near or above break even. This should take no more than 3 years from construction.
+               </li>
+            </ul>
+         </div><!-- End Content -->
+      </div><!-- Begin Footer -->
+      <div class="foot">
+         FPGeneration.com<br />
+         <a href="mailto:info@fpgeneration.com">Contact us</a>
+      </div><!-- End Footer -->
+   </body>
+</html>

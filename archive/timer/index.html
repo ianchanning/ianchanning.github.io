@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<!-- da magic -->
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<title>Timer</title>
+		<!-- <link type="text/css" href="http://taitems.github.com/Aristo-jQuery-UI-Theme/css/Aristo/Aristo.css" rel="stylesheet" /> -->
+		<link type="text/css" href="css/Aristo/Aristo.css" rel="stylesheet" />		
+		<link type="text/css" href="css/style.css?ver=0.3" rel="stylesheet" />		
+		<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script> -->
+		<script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+		<!-- <script type="text/javascript" src="http://code.jquery.com/ui/1.8.13/jquery-ui.min.js"></script> -->
+		<script type="text/javascript" src="js/ui/1.8.13/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="js/jquery.stopwatch.js"></script>
+		<script type="text/javascript">
+			$(function(){
+			
+				// Button Set
+				$("#radio1").buttonset();
+				
+				$(document).keydown(function(event) {
+					if (event.keyCode == '32') { // space bar
+						event.preventDefault(); // the deafult being scroll the page down
+					}
+				});
+				
+				$(document).keyup(function(event) {
+					if (event.keyCode == '32') { // space bar
+						event.preventDefault();
+						if ($('#radio-stop').prop('checked')) {
+							$('#radio-play').prop('checked', true);
+							$('#radio-play').click();
+						} else {
+							$('#radio-stop').prop('checked', true);
+							$('#radio-stop').click();
+						}
+						$("#radio1").buttonset("refresh");
+					}
+				});
+				
+				$('#clock').stopwatch();
+			});
+		</script>
+	</head>
+	<body class="ui-form">
+		<div id="header">
+			<h1>Timer</h1>
+		</div>
+
+		<div id="clock">
+		</div>
+		<div id="radio1">
+			<input type="radio" id="radio-play" name="radio1" class="start" /><label for="radio-play" title="Press the spacebar... I dare ya"><span class="ui-icon ui-icon-play"></span></label>
+			<input type="radio" id="radio-stop" name="radio1" checked="checked" class="stop" /><label for="radio-stop" title="Press the spacebar again... I double dare ya"><span class="ui-icon ui-icon-stop"></label>
+		</div>
+		
+	</body>
+</html>

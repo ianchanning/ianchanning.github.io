@@ -1,0 +1,13 @@
+/*
+Theme Name: mnmlist
+Theme URI: http://mnmlist.com/theme/
+Description: A very clean minimalist theme, without comments, search, archives or other features.
+Author: Leo Babauta, Ian Channing
+Author URI: http://mnmlist.com
+.
+This theme is uncopyrighted, free, and offered as is.
+.
+*/
+
+@import url(css/normalize.css);
+@import url(css/main.css?v=4);

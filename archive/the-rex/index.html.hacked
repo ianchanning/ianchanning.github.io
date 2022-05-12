@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta name="generator" content=
+      "HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <link rel="stylesheet" type="text/css" href="lib/css/main.css" />
+      <title>
+         The Rex Cinema
+      </title>
+   </head>
+   <body>
+		<div class="header">
+			<script src="lib/javascript/header.js" type="text/javascript"><!-- --></script>
+			<noscript>
+			<h1 class="title">
+				THE REX
+			</h1>
+			<h1>
+				CINEMA
+			</h1>
+			<h2>
+				BERKHAMSTED
+			</h2>
+			</noscript>
+		</div>
+      <div class="main">
+			<div class="navbar">
+				<h1 class="title">
+					www.therexcinema.com
+				</h1>
+				<h1>
+					Box Office: 01442 877 759
+				</h1>
+	         <ul id="navbar">
+	            <li>
+	               HOME
+	            </li>
+	            <li>
+	               <a href="programme/" title="Programme">PROGRAMME</a>
+	            </li>
+	            <li>
+	               <a href="prices/" title="Prices">PRICES</a>
+	            </li>
+	            <li>
+	               <a href="photos/" title="Photos">PHOTOS</a>
+	            </li>
+	            <li>
+	               <a href="membership/" title="Membership">MEMBERSHIP</a>
+	            </li>
+	            <li>
+	               <a href="merchandise/" title="Merchandise">MERCHANDISE</a>
+	            </li>
+	            <li>
+	               <a href="about/" title="About">ABOUT</a>
+	            </li>
+	            <li>
+	               <a href="contact/" title="Contact">CONTACT</a>
+	            </li>
+	         </ul>
+			</div>
+			<!--<img src="lib/images/front.jpg" alt=
+         "Panoramic view of theatre stage with curtain drawn and chairs arranged around the tables in foreground" />-->
+			<p class="frontquote">
+               &ldquo;Is this Britain&rsquo;s most <a href="photos/" title=
+               "Photos of The Rex">beautiful&nbsp;cinema</a>?&rdquo; <cite>Daily&nbsp;Telegraph</cite>
+         </p>
+			<p>
+				<a href="programme/#tickets" title="Programme - Availability">Ticket Availability</a> | <a href="information/" title="Information - Disabled Access">Disabled
+               Access</a> | <a href="merchandise/" title="Merchandise">Rex Merchandise</a>
+			</p>
+         <div class="center">
+            <table summary="Box office details">
+               <caption>
+                  Box Office
+               </caption>
+               <tbody>
+                  <tr>
+                     <th scope="row" id="row1">
+                        Telephone:
+                     </th>
+                     <td>
+                        (01442) 877 759
+                     </td>
+                  </tr>
+                  <tr>
+                     <th scope="row" id="row2">
+                        Opening hours:
+                     </th>
+                     <td>
+                        10.30am-6.00pm (Monday-Saturday), 4.30pm-5.30pm (Sunday)
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+   </body>
+</html>

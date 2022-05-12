@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+      <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <meta name="keywords" content="fusion,power,generation,nuclear,fission,physics,ITER,MIX,Multi-pole Ion beam eXperiment,IEC,inertial electrostatic confinement,tokamak" />
+      <meta name="description" content="fusion power generation is engaged in the development of nuclear fusion energy." />
+      <link rel="stylesheet" href="../lib/css/main.css" type="text/css" /><!-- *** Begin Editable below 'Fusion Power Generation : ' *** -->
+      <title>
+         About us (Fusion Power Generation)
+      </title><!-- *** End Editable *** -->
+   </head>
+   <body>
+      <!-- Begin Header -->
+      <div class="head">
+         <!--<div class="headContact">
+            <a href="mailto:info@fpgeneration.com" title="Email us with your questions">Contact us</a>
+         </div>-->
+         <div class="headLogo">
+            <img src="../lib/images/fpg_logo6_151x150.png" width="151" height="150" alt="[Fusion Power Generation Logo]" title=
+            "Four arrows pointing in and four arrows pointing out..." />
+            <img id="headName" src="../lib/images/fpg_name6_369x48.png" width="369" height="48" alt="[Fusion Power Generation]" />
+         </div>
+         <ul id="navbar">
+				<li class="headHome"><a href="../index.html" title="Home page">fpgeneration.com</a></li> 
+				<li class="headAboutUs selected">ABOUT US</li>
+				<li class="headTechnology"><a href="../technology/index.html" title="Descriptions of the technology">TECHNOLOGY</a></li>
+				<li class="headQuestions"><a href="../questions/index.html" title="Questions and answers about the technology">QUESTIONS</a></li>
+         	
+         </ul>
+
+      </div>
+      <div class="main">
+         <h1>
+            <!-- *** Begin Editable *** -->
+            <span class="firstLetter">A</span>bout us <!-- *** End Editable *** -->
+         </h1><!-- End Header -->
+         <!-- Begin Content -->
+         <h2>
+				<a name="alexklein" id="alexklein"><!-- --></a>
+            ALEX KLEIN
+         </h2><img src="../lib/images/alexklein1_100x120.jpg" alt="[alex klein]" height="120" width="100" />
+         <p>
+            Alex is CEO and chief scientist at <acronym title="Fusion Power Generation">FPG</acronym>. In 1999 he invented the <a href="../technology/index.html#mix">MIX</a> concept, which forms the
+            basis for the proposed experiments at FPG. Alex earned his PhD in Applied Physics from Columbia University in New York, holds a Masters degree from the University of Texas at Austin, and
+            has been working in the field of fusion plasma physics at various institutions and as consultant to private fusion technology firms for over a decade.
+         </p>
+         <p>
+            For several years he was experimental physicist at EMC2, where he worked with R.W. Bussard and N. Krall on Polywell IEC fusion experiments. Currently, he works as research scientist on
+            behalf of the Massachusetts Institute of Technology and is stationed at the largest fusion experiment in the world, the JET tokamak, at the Culham Science Centre in the UK. Alex has
+            extensively written articles on fusion and fusion politics, IEC fusion, and is author on numerous peer reviewed papers on tokamak physics.
+         </p>
+         <h2>
+				<a name="matthewwittman" id="matthewwittman"><!-- --></a>
+            MATTHEW WITTMAN
+         </h2>
+         <p>
+            Matthew is a co-founder and adviser to FPG. He has a BA in natural sciences from Cambridge University in the UK, and has just completed a PhD in geophysical fluid dynamics at Columbia
+            University, where his work involved mathematical modeling of instabilities in complex fluid flows. His work on climate processes is slated for inclusion in the upcoming report by the
+            intergovernmental panel on climate change (IPCC). He has extensive experience in numerical modeling of nonlinear systems, and will be involved in developing numerical simulations of the
+            IEC reactor.
+         </p>
+         <p>
+            Matthew currently works in finance, where he is involved in investing globally in alternative energy projects.
+         </p>
+         <h2>
+				<a name="terricarrmuran" id="terricarrmuran"><!-- --></a>
+            TERRI CARR MURAN
+         </h2>
+         <p>
+            Terri is President of Investor Relations at <acronym title="Fusion Power Generation">FPG</acronym>. She is the Founder and President of two other companies York Design and Kensington
+            Marketing Group . Her expertise in business management, marketing and fund-raising has earned Terri executive positions on the board of Save the Children, and Kids and Cars. Her devotion
+            to philanthropy has led her to serve on committees for The Cold Spring Harbor Laboratory, The Nassau County Museum of Art and The Nassau Parks Conservancy.
+         </p><!-- End Content -->
+      </div><!-- Begin Footer -->
+      <div class="foot">
+         FPGeneration.com<br />
+         <a href="mailto:info@fpgeneration.com">Contact us</a>
+      </div><!-- End Footer -->
+   </body>
+</html>

@@ -1,0 +1,159 @@
+BODY
+{
+	font-family: arial;/*garamond, sans-serif;*/
+}
+
+A
+{
+
+}
+
+A:hover
+{
+	font-style: normal;
+	text-decoration: none;
+}
+
+A:visited
+{
+
+}
+
+div.headLogo, div.headName, div.headContact
+{
+	position: absolute;
+	left: 1em;
+}
+
+div.headLogo
+{
+	top: 3em;
+}
+
+div.headName, div.head
+{
+	margin-top: 0.55em;
+	height: 1.8em;
+	padding-top: 0.25em;
+}
+
+div.headName
+{
+	border-top: 0.4em solid;
+	border-left: 0.4em solid;
+	border-right: 0.4em solid;
+	border-bottom: 0.4em solid;
+	border-color: black;
+	top: 0em;
+	
+	background-color: black;
+	color: white;
+	text-align: center;
+	width: 138px;
+	xpadding-bottom: 0.4em;
+	/*font-weight: bold;*/
+}
+
+div.headContact
+{
+	border-top: 0.4em solid;
+	border-left: 0.4em solid;
+	border-right: 0.4em solid;
+	border-bottom: 0.4em solid;
+	border-color: black;
+	top: 12.1em;
+	text-align: center;
+	width: 138px;
+	xbackground-color: white;
+}
+
+div.head, div.main, div.foot
+{
+	padding-left: 10.5em;
+	border-top: 0.4em solid white;
+	/*border-left: 0.4em solid white;
+	border-right: 0.4em solid white;*/
+	border-bottom: 0.4em solid white;
+	margin-left: 0.5em;
+}
+
+div.head
+{
+	xpadding-bottom: 0.4em;
+	border-top-color: orange; /*orange;*/
+	border-bottom-color: black; /*orange;*/
+	background-color:orange;
+}
+
+div.main
+{
+	margin-top: 0.1em;
+	padding-top: 2.2em;
+	border-left: 0.4em solid;
+	border-left-color: black; /*orange;*/
+}
+
+div.foot
+{
+	border-left: 0.4em solid white;
+}
+
+.headAboutUs, .headTechnology, .headQuestions, .headHome
+{
+	xbackground-color: white;
+	padding-top: 0.25em;
+	padding-left: 0.25em;
+	padding-right: 0.25em;
+	padding-bottom: 0.45em;
+	border-top: 0.4em solid;
+	border-left: 0.4em solid;
+	border-right: 0.4em solid;
+	border-bottom: 0em solid;
+	border-color: orange;
+	xborder-bottom-color: black;
+	/*height: 1.8em; -- no effect*/
+}
+
+.selected
+{
+	background-color: white;
+	border-color: black; /*orange;*/
+	xborder-bottom-color: white;
+	padding-bottom: 1.05em;
+}
+
+H1, H2, H3
+{
+	color: black; /*purple;*/
+}
+
+H1
+{
+	font-size: 3em;
+}
+
+ACRONYM, .abbr
+{
+	border-bottom: 1px dotted black;
+}
+
+TABLE, TD, TH
+{
+	border: 1px solid black;
+}
+
+P, div.figureText, div.content
+{
+	width: 27em;
+	text-align: justify;
+}
+
+.figureText
+{
+	font-size: 0.8em;
+}
+
+.figureImage
+{
+	border: 2px solid black;
+}

@@ -1,0 +1,217 @@
+body
+{
+	xfont-size: 1.1em;
+	xtext-align: center;
+	background-color: #69001e;
+	margin-top: 0;
+	margin-bottom: 0em;
+	font-size:100%;
+	line-height:1.25em;}
+
+a
+{
+	color: #20305e; /*#69001e;*/ /*#ec6d7f;*/
+}
+
+img
+{
+	border:  8px solid gold;
+}
+
+h1, h2, h3
+{
+	font-family: tahoma, sans serif;
+}
+
+h1
+{
+	color: #69001e; /*red;*/
+	font-weight: normal;
+}
+
+h2
+{
+	color: white;
+	background-color: #69001e; /*red;*/
+	xtext-transform: uppercase; 
+	font-family: tahoma, sans serif;
+}
+
+div.header
+{
+	position: absolute;
+	left: 0em;
+	top: 0em;
+	margin-left: 0.5em;
+	margin-top: 0.5em;
+	padding-top: 0em;
+	xborder: 1px solid black;
+	
+}
+
+div.main
+{
+	width: 50em;
+	margin-left: 14.7em;
+	margin-right: 1em;
+	margin-top: 0em;
+	margin-bottom: 0em;
+	
+	/*border-left: 1px solid #ec6d7f;
+	border-right: 1px solid #ec6d7f;*/
+	/*top right bottom left*/
+	padding: 0.5em 0.5em 1em 0.5em;
+	background-color: white;
+}
+
+.header h1.title
+{
+	color: white;
+}
+
+.header img
+{
+	border: 0;
+}
+
+.header h1
+{
+	font-weight: normal;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	color: #ec6d7f; /*pink*/
+}
+
+.header h1
+{
+	font-size: 2em; /*18px;*/
+	letter-spacing: 20px;
+}
+
+.header h2
+{
+	font-size: 1.25em;
+	font-weight: normal;
+	letter-spacing: 8px;
+	color: #ec6d7f; /*pink*/
+}
+
+.navbar h1.title, 
+{
+	color: #ec6d7f; /*pink*/
+}
+
+.navbar h1
+{
+	font-size: 2em; /*18px;*/
+	font-weight: normal;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	color: #ec6d7f;
+}
+
+h1.title
+{
+	padding-top: 0.175em;
+	margin-top: 0em;
+	margin-bottom: 0.5em;
+	font-size: 3.45em;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	letter-spacing: 0px;
+}
+
+table
+{
+	border: 1px solid #000;
+	font-family: tahoma, sans serif;
+	background-color: #ffe209; /*gold;*/
+	border-collapse: collapse;
+	
+}
+
+table#tickets
+{
+	background-color: #f7e05a; /*gold;*/
+	font-size: 10pt;
+}
+
+.sat, .sun, .SAT, .SUN
+{
+	background-color: #ffe209; /*gold;*/
+}
+
+td, th
+{
+	border: 1px solid #000;
+	/*border-bottom: 1px solid #000;*/
+	text-align: left;
+}
+
+td.soldout
+{
+	color: white;
+	background-color: #69001e; /*red;*/
+	text-transform: uppercase; 
+	font-family: broadway, tahoma, sans serif;
+}
+
+.main p {
+    font-size:1.125em;
+}
+
+p, ul, ol
+{
+	text-align: left;
+	background-color: white;
+
+}
+
+p.caption
+{
+	xtext-align: center;
+}
+/* AListApart code */
+#navbar {
+	height: 1.66em;
+	padding: 0 0 0 0px;
+	xcolor: white;
+	xcolor: #20305e; /*navy;*/
+	color: #ec6d7f; /*pink */
+	xbackground-color: #20305e; /*navy;*/
+	xbackground-color: #69001e; /*red;*/
+	xbackground-color: #ec6d7f; /*pink */
+	xborder-top: 5px solid #333;
+	xborder: 1px solid black;
+	font-size: 14pt;
+	xfont-weight: bold;
+	font-family: tahoma, sans serif;
+	overflow: hidden;
+	xmin-width: 750px;
+	margin: 0em 0 1.4em 0;
+	
+}
+#navbar li 
+{
+	float: left; 
+	padding: 0px 10px 0px 0px; 
+	xmargin-right: 5px;
+	list-style-type: none;
+}
+#navbar li a, #navbar li.selected  
+{
+	xdisplay: block; 
+	text-transform: uppercase; 
+	xcolor: white;
+	color: #20305e; /*navy;*/
+	xfont-weight:bold;
+	xtext-decoration: none;
+}
+
+#navbar li a:hover
+{
+	xtext-decoration: underline;
+}

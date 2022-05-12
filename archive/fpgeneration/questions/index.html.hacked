@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
+      <meta name="generator" content="HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <meta name="keywords" content="fusion,power,generation,nuclear,fission,physics,ITER,MIX,Multi-pole Ion beam eXperiment,IEC,inertial electrostatic confinement,tokamak" />
+      <meta name="description" content="fusion power generation is engaged in the development of nuclear fusion energy." />
+      <link rel="stylesheet" href="../lib/css/main.css" type="text/css" /><!-- *** Begin Editable below 'Fusion Power Generation : ' *** -->
+      <title>
+         Questions (Fusion Power Generation)
+      </title><!-- *** End Editable *** -->
+   </head>
+   <body>
+      <!-- Begin Header -->
+      <div class="head">
+         <!--<div class="headContact">
+            <a href="mailto:info@fpgeneration.com" title="Email us with your questions">Contact us</a>
+         </div>-->
+         <div class="headLogo">
+            <img src="../lib/images/fpg_logo6_151x150.png" width="151" height="150" alt="[Fusion Power Generation Logo]" title=
+            "Four arrows pointing in and four arrows pointing out..." />
+            <img id="headName" src="../lib/images/fpg_name6_369x48.png" width="369" height="48" alt="[Fusion Power Generation]" />
+         </div>
+         <ul id="navbar">
+            <li class="headHome">
+               <a href="../index.html" title="Home page">fpgeneration.com</a>
+            </li>
+            <li class="headAboutUs">
+               <a href="../aboutus/index.html" title="Who we are and what we've done">ABOUT US</a>
+            </li>
+            <li class="headTechnology">
+               <a href="../technology/index.html" title="Descriptions of the technology">TECHNOLOGY</a>
+            </li>
+            <li class="headQuestions selected">QUESTIONS
+            </li>
+         </ul>
+      </div>
+      <div class="main">
+         <h1>
+            <!-- *** Begin Editable *** -->
+             <span class="firstLetter">Q</span>uestions <!-- *** End Editable *** -->
+         </h1><!-- End Header -->
+         <!-- Begin Content -->
+         <ol>
+            <li>
+               <a href="#question1">What is fusion power?</a>
+            </li>
+            <li>
+               <a href="#question2">Why is fusion needed when there are plenty of alternative energy sources?</a>
+            </li>
+            <li>
+               <a href="#question3">Is fusion safe, and how does it different to fission?</a>
+            </li>
+            <li>
+               <a href="#question4">What are we proposing?</a>
+            </li>
+            <li>
+               <a href="#question5">How does IEC work?</a>
+            </li>
+            <li>
+               <a href="#question6">What is the state of fusion power development today?</a>
+            </li>
+            <li>
+               <a href="#question7">Why is IEC better?</a>
+            </li>
+            <li>
+               <a href="#question8">If IEC is so promising why is it not being widely used?</a>
+            </li>
+            <li>
+               <a href="#question9">What is different about our approach?</a>
+            </li>
+            <li>
+               <a href="#question10">What do we aim to achieve?</a>
+            </li>
+            <li>
+               <a href="#question11">After demonstrating the feasibility of MIX, then what?</a>
+            </li>
+         </ol><a name="question1" id="question1"> </a>
+         <h3>
+            1. What is fusion power?
+         </h3>
+         <div class="content">
+            <p>
+               Fusion power promises to produce large amounts of energy at low cost from practically unlimited fuel, with little or no pollution, and to satisfy mankind's energy demands for the
+               foreseeable future.
+            </p>
+            <p>
+               Fusion is any nuclear reaction in which two light nuclei combine to form a heavier nucleus with the release of energy via Einstein's famous equivalence of mass and energy E = mc
+               <sup>2</sup>. Nuclear fusion powers the sun and other stars.
+            </p>
+            <p>
+               Despite enormous progress in our scientific understanding of fusion, practical power production remains elusive.
+            </p>
+         </div><a name="question2" id="question2"> </a>
+         <h3>
+            2. Why is fusion needed when there are plenty of alternative energy sources?
+         </h3>
+         <div class="content">
+            <p>
+               Controlled fusion power on earth would constitute an environmentally friendly, economically competitive and effectively limitless source of energy.
+            </p>
+            <p>
+               By the turn of the next century, the Earth's population is predicted to reach 12 billion. This unprecedented increase in population, coupled with rising prosperity in the developing
+               world will place huge demands on global energy supplies.
+            </p>
+            <p>
+               Fossil fuels, currently our primary source of energy, are beginning to run out, and burning them releases greenhouse gases which is leading to climate change that if unchecked will
+               impose unacceptable economic and humanitarian costs on the global population within a generation.
+            </p>
+            <p>
+               Conventional nuclear power (fission) produces long-lived and very hazardous radioactive waste, and the waste material can be used to build nuclear weapons. Furthermore, fuel for
+               fission reactors is limited.
+            </p>
+            <p>
+               Renewable energy sources such as wind, wave or solar power provide variable output and are unlikely to ever satisfy total demand. At current costs they are nearly always economically
+               uncompetitive with fossil fuels.
+            </p>
+         </div>
+         <table class="sidenote" summary="comparison of fossil fuel and fusion fuel energy generation">
+            <caption>
+               Side note: comparison of fossil fuel and fusion fuel energy generation
+            </caption>
+            <thead>
+               <tr>
+                  <th scope="col" id="col1"></th>
+                  <th scope="col" id="col2">
+                     Coal Power station
+                  </th>
+                  <th scope="col" id="col3">
+                     Fusion Power station
+                  </th>
+               </tr>
+            </thead>
+            <tfoot>
+               <tr>
+                  <th scope="row" id="rowfoot">
+                     Greenhouse Gas Emission<br />
+                     (tons)
+                  </th>
+                  <td>
+                     11 million
+                  </td>
+                  <td>
+                     0
+                  </td>
+               </tr>
+            </tfoot>
+            <tbody>
+               <tr>
+                  <th scope="row" id="row1">
+                     Power Output<br />
+                     (kWh per year)
+                  </th>
+                  <td>
+                     7 billion
+                  </td>
+                  <td>
+                     7 billion
+                  </td>
+               </tr>
+               <tr>
+                  <th scope="row" id="row2">
+                     Fuel Consumption<br />
+                     (tons)
+                  </th>
+                  <td>
+                     3 million
+                  </td>
+                  <td>
+                     0.1
+                  </td>
+               </tr>
+            </tbody>
+         </table><a name="question3" id="question3"> </a>
+         <h3>
+            3. Is fusion safe, and how does it differ to fission?
+         </h3>
+         <div class="content">
+            <p>
+               Both fusion and fission are forms of nuclear energy, but are fundamentally different: fusion is the combination of light nuclei, and fission is the splitting of heavy nuclei.
+            </p>
+            <p>
+               From a safety point of view, with fusion there is absolutely no chance of a runaway reaction like the reaction that destroyed the Chernobyl fission reactor.
+            </p>
+            <p>
+               Fusion requires the active maintenance of plasmas (ionized gases) at extraordinarily high temperatures and pressures, and any departure from these conditions will result in a rapid
+               cooling of the reacting plasma and the termination of the reaction. Thus if a fusion reactor malfunctions it will shut down automatically, unlike a fission reactor that can continue to
+               operate dangerously after the reactor malfunctions.
+            </p>
+            <p>
+               The fuel for fusion reactions is hydrogen and other light elements that are abundant in seawater and throughout the earth's crust. The fusion of all of the deuterium, a form of
+               hydrogen, in the sea could easily meet the expected global energy demand beyond the expected lifetime of the planet. If this demand is met with uranium, the fuel for fission reactors,
+               it will be exhausted within twenty to fifty years.
+            </p>
+            <p>
+               The waste from fusion is likely to consist only of small amounts of helium, a completely harmless and in fact useful gas, which can be released into the atmosphere. Waste from fission
+               reactors has to be disposed of in securely guarded repositories deep underground, and remains hazardous for tens of thousands of years.
+            </p>
+         </div><a name="question4" id="question4"> </a>
+         <h3>
+            4. What are we proposing?
+         </h3>
+         <div class="content">
+            <p>
+               We have a patent for a nuclear fusion reactor based on a design that was the first to demonstrate fusion power production in 1967.
+            </p>
+            <p>
+               This approach, called inertial electrostatic confinement, or IEC, has been abandoned by the mainstream community due to early disappointments in its development and the ostensibly
+               greater promise of alternative approaches. We have designed a modification that we believe will solve the problems with the IEC approach.
+            </p>
+            <p>
+               We aim to build a prototype machine that demonstrates net power production within three years of obtaining funding.
+            </p>
+         </div><a name="question5" id="question5"> </a>
+         <h3>
+            5. How does IEC work?
+         </h3>
+         <p>
+            Read more in our technology section on <a href="../technology/index.html#iec">IEC</a>
+         </p><a name="question6" id="question6"> </a>
+         <h3>
+            6. What is the state of fusion power development today?
+         </h3>
+         <div class="content">
+            <p>
+               The accepted consensus in policy and scientific circles is that commercially available fusion power is at least thirty years away.
+            </p>
+            <p>
+               The US fusion budget stands at approximately $250m annually, and the world budget is about ten times as large. The vast majority of this money is being funneled into an international
+               mega-project, the construction of a very large tokamak in the South of France called ITER (International Thermonuclear Experimental Reactor. ITER is designed to demonstrate a small net
+               energy release within a twenty-year lifetime, and will then be followed by a larger prototype reactor with the aim of producing usable power.
+            </p>
+            <p>
+               The tokamak is a design for a fusion reactor that has been the front-runner in the mainstream fusion community since the 1970s. Tokamaks are large, donut shaped reactors that aim to
+               confine hot plasmas using strong magnetic fields. They are necessarily large, complex and expensive.
+            </p>
+            <p>
+               Aside from the tokamak, there are many other design concepts for fusion reactors which have been neglected, abandoned, or even forgotten by the scientific community due to early
+               dominance of tokamak-based programs and subsequent funding squeezes.
+            </p>
+         </div><a name="question7" id="question7"> </a>
+         <h3>
+            7. Why is IEC better?
+         </h3>
+         <div class="content">
+            <p>
+               IEC promises a cheap, simple approach to commercial fusion power generation that could be developed much, much faster on a modest budget, as compared with a complex, expensive
+               multinational project such as ITER.
+            </p>
+            <p>
+               IEC has the additional advantage of being able to use so-called advanced fuels that produce no radiation. The physics of most other fusion reactor designs prevent them from using
+               advanced fuels, and other designs are therefore burdened with the necessity of managing large amounts of radiation.
+            </p>
+         </div>
+         <p>
+            Despite the merits of IEC, the mainstream magnetic fusion community rejects IEC as unlikely to lead to the development of commercial fusion reactors.
+         </p><a name="question8" id="question8"> </a>
+         <h3>
+            8. If IEC is so promising why is it not being widely used?
+         </h3>
+         <div class="content">
+            <p>
+               Many fusion researchers have never heard of IEC, and most fusion scientists have made their careers in tokamak-related projects.
+            </p>
+            <p>
+               Controversy surrounds the viability of IEC devices. Work published in the last decade apparently calculated that traditional IEC machines could never produce net power. More recent
+               work, however, robustly refutes the earlier calculations; in any case no published work exists that takes account of the improvements that we are proposing.
+            </p>
+         </div><a name="question9" id="question9"> </a>
+         <h3>
+            9. What is different about our approach?
+         </h3>
+         <p>
+            Read more in our technology section on <a href="../technology/index.html#mix">MIX</a>
+         </p><a name="question10" id="question10"> </a>
+         <h3>
+            10. What do we aim to achieve?
+         </h3>
+         <p>
+            See our <a href="../index.html">home page</a> for details
+         </p><a name="question11" id="question11"> </a>
+         <h3>
+            11. After demonstrating the feasibility of MIX, then what?
+         </h3>
+         <div class="content">
+            <p>
+               We will design and build a prototype unit, demonstrating useful power production.
+            </p>
+            <p>
+               The resulting technology can then be licensed to a strategic energy industry player, like <acronym title="General Electric">GE</acronym>, or we can raise money on the capital markets
+               to start scale production.
+            </p>
+            <p>
+               Fusion power from a MIX-derived machine would cost significantly less than conventionally generated electricity. Under pessimistic assumptions, IEC energy would cost no more than one
+               tenth of conventionally generated power, and will most likely cost even less.
+            </p>
+            <p>
+               The global energy market is currently worth about USD 5 trillion. Commercially viable IEC fusion reactors would capture most of this market.
+            </p>
+         </div><!-- End Content -->
+      </div><!-- Begin Footer -->
+      <div class="foot">
+         FPGeneration.com<br />
+         <a href="mailto:info@fpgeneration.com">Contact us</a>
+      </div><!-- End Footer -->
+   </body>
+</html>

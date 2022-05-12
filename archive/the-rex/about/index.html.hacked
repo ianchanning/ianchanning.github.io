@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta name="generator" content=
+      "HTML Tidy for Windows (vers 14 February 2006), see www.w3.org" />
+      <link rel="stylesheet" type="text/css" href="../lib/css/main.css" />
+      <title>
+         About The Rex (The Rex Cinema)
+      </title>
+   </head>
+   <body>
+		<div class="header">
+			<script src="../lib/javascript/header.js" type="text/javascript"><!-- --></script>
+			<noscript>
+			<h1 class="title">
+				THE REX
+			</h1>
+			<h2 class="subtitle1">
+				CINEMA
+			</h2>
+			<h2 class="subtitle2">
+				BERKHAMSTED
+			</h2>
+			<h2 class="subtitle3">
+				www.therexcinema.com
+			</h2>
+			</noscript>
+		</div>
+      <div class="main">
+         <ul id="navbar">
+            <li>
+               <a href="/the-rex/" title="Home">HOME</a>
+            </li>
+            <li>
+               <a href="/the-rex/programme/" title="Programme">PROGRAMME</a>
+            </li>
+            <li>
+               <a href="/the-rex/prices/" title="Prices">PRICES</a>
+            </li>
+            <li>
+               <a href="/the-rex/photos/" title="Photos">PHOTOS</a>
+            </li>
+            <li>
+               <a href="/the-rex/membership/" title="Membership">MEMBERSHIP</a>
+            </li>
+            <li>
+               <a href="/the-rex/merchandise/" title="Merchandise">MERCHANDISE</a>
+            </li>
+            <li>
+               ABOUT
+            </li>
+            <li>
+               <a href="/the-rex/contact/" title="Contact">CONTACT</a>
+            </li>
+         </ul>
+         <h1>
+            About The Rex
+         </h1>
+         <h2>
+            History
+         </h2>
+         <p>
+            The Rex was first built in 1934. It prospered for many decades before declining in
+            popularity and then closing in 1988.
+         </p>
+         <h2>
+            Restoration
+         </h2>
+         <p>
+            Between 1998 and 2004 the Rex underwent a restoration costing &pound;1 million. The Rex
+            re-opened its doors to the public in 2004, with three sell out shows in the first two
+            weeks.
+         </p>
+         <h2>
+            Links
+         </h2>
+         <ul>
+            <li>
+               <a href="http://film.guardian.co.uk/Cinema/0,,-8637,00.html" title=
+               "The Guardian newspaper film listings for this week (External site)">The Guardian
+               listing</a>
+            </li>
+            <li>
+               <a href=
+               "http://www.telegraph.co.uk/arts/main.jhtml?xml=/arts/2006/01/09/barex09.xml&amp;sSheet=/arts/2006/01/09/ixfilmmain.html"
+               title=
+               "Daily Telegraph article: Is this the most beautiful cinema in Britain? (External site)">
+               Daily Telegraph article</a>
+            </li>
+            <li>
+               <a href="http://www.bbc.co.uk/dna/actionnetwork/A3614221" title=
+               "BBC article about the restoration (External site)">BBC article</a>
+            </li>
+            <li>
+               <a href="http://www.bbc.co.uk/dna/h2g2/A28678404" title=
+               "Hitch Hikers Guide to the Galaxy write-up (External site)"><abbr title=
+               "Hitch Hikers Guide to the Galaxy">H2G2</abbr> write-up</a>
+            </li>
+         </ul>
+         <table summary="Box office details">
+            <caption>
+               Box Office
+            </caption>
+            <tbody>
+               <tr>
+                  <th scope="row" id="row1">
+                     Telephone:
+                  </th>
+                  <td>
+                     (01442) 877 759
+                  </td>
+               </tr>
+               <tr>
+                  <th scope="row" id="row2">
+                     Opening hours:
+                  </th>
+                  <td>
+                     10.30am-6.00pm (Monday-Saturday), 4.30pm-5.30pm (Sunday)
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </body>
+</html>

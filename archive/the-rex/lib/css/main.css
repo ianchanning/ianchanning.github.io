@@ -1,0 +1,265 @@
+body
+{
+	xfont-size: 1.1em;
+	xtext-align: center;
+	background-color: #901818;
+	margin: 0.8em;
+	padding: 0px;
+	font-size:100%;
+	line-height:1.25em;}
+
+a
+{
+	color: #781818; /*#901818;*/ /*#C09060;*/
+}
+
+img
+{
+	border:  1px solid black;
+	padding: 0.2em;
+	
+}
+
+h1, h2, h3
+{
+	font-family: tahoma, sans serif;
+}
+
+h1
+{
+	color: #A87848; /*red;*/
+	font-weight: normal;
+}
+
+h2
+{
+	color: #D8A860;
+	/*background-color: #901818;*/ /*red;*/
+	xtext-transform: uppercase; 
+	font-family: tahoma, sans serif;
+	font-size: 1.3em;
+}
+
+div.header
+{
+	position: absolute;
+	left: 0em;
+	top: 0em;
+	xpadding-left: 0.5em;
+	xpadding-top: 0.5em;
+	
+	padding: 0.5em;
+	xborder: 1px solid black;
+	background-color: #000;
+	width: 100%; /*13.2em;*/
+	height:10em;
+	z-index: -1;
+	
+}
+
+div.main
+{
+	width: 49em;
+	margin-left: 14.2em;
+	margin-right: 0em;
+	margin-top: 0em;
+	margin-bottom: 0em;
+	
+	/*border-left: 1px solid #C09060;
+	border-right: 1px solid #C09060;*/
+	/*top right bottom left*/
+	padding: 0.5em 0.5em 1em 0.5em;
+	background-color: white;
+}
+
+.header h1.title
+{
+	color: white;
+}
+
+.header img
+{
+	border: 0;
+}
+
+.header h1
+{
+	font-weight: normal;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	color: #C09060; /*pink*/
+}
+
+.header h1
+{
+	font-size: 2em; /*18px;*/
+	letter-spacing: 20px;
+}
+
+.header h2
+{
+	font-size: 1.25em;
+	font-weight: normal;
+	letter-spacing: 8px;
+	color: #C09060; /*pink*/
+}
+
+.navbar h1.title
+{
+	color: #C09060; /*pink*/
+}
+
+.navbar h1
+{
+	font-size: 2em; /*18px;*/
+	font-weight: normal;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	color: #C09060;
+}
+
+h1.title
+{
+	padding-top: 0.175em;
+	margin-top: 0em;
+	margin-bottom: 0.5em;
+	font-size: 3.45em;
+	font-family: tahoma, sans serif;
+	/*xborder-bottom: 5px solid #333;*/
+	background-color: transparent;
+	letter-spacing: 0px;
+}
+
+table
+{
+	border: 1px solid #000;
+	/*font-family: tahoma, sans serif*/
+	background-color: #D8A860; /*gold;*/
+	border-collapse: collapse;
+   font-size:1.125em;
+	margin-bottom: 1.5em;
+}
+
+table#tickets
+{
+	background-color: #D8A860; /*gold;*/
+   font-size:1.125em;
+	/*font-size: 10pt;*/
+
+}
+
+.sat, .sun, .SAT, .SUN
+{
+	background-color: #C09060; /*gold;*/
+}
+
+td, th
+{
+	border: 1px solid #000;
+	/*border-bottom: 1px solid #000;*/
+	text-align: left;
+	padding: 0.2em;
+}
+
+table#tickets td, table#tickets th
+{
+	padding: 0.1em;
+}
+
+td.soldout, td strong
+{
+	color: #901818;
+	/*background-color: #D8A860;*/ /*red;*/
+	text-transform: uppercase; 
+	/*font-family: broadway, tahoma, sans serif;*/
+	font-weight: bold;
+	font-style: italic;
+}
+
+.main p, address {
+    font-size:1.125em;
+}
+
+p, ul, ol, blockquote
+{
+	text-align: left;
+	background-color: white;
+	font-size:1.125em;
+}
+
+p.caption
+{
+	xtext-align: center;
+}
+/* AListApart code */
+#navbar {
+	height: 1.66em;
+	padding: 0 0 0 0px;
+	xcolor: white;
+	xcolor: #781818; /*navy;*/
+	color: #C09060; /*pink */
+	xbackground-color: #781818; /*navy;*/
+	xbackground-color: #901818; /*red;*/
+	xbackground-color: #C09060; /*pink */
+	xborder-top: 5px solid #333;
+	xborder: 1px solid black;
+	font-size: 14pt;
+	xfont-weight: bold;
+	font-family: tahoma, sans serif;
+	overflow: hidden;
+	xmin-width: 750px;
+	margin: 0em 0 1.4em 0;
+	
+}
+#navbar li 
+{
+	float: left; 
+	padding: 0px 10px 0px 0px; 
+	xmargin-right: 5px;
+	list-style-type: none;
+}
+#navbar li a, #navbar li.selected  
+{
+	xdisplay: block; 
+	text-transform: uppercase; 
+	xcolor: white;
+	color: #781818; /*navy;*/
+	xfont-weight:bold;
+	xtext-decoration: none;
+}
+
+#navbar li a:hover
+{
+	xtext-decoration: underline;
+}
+
+p.frontquote
+{
+	background: white url(../images/front_2.jpg) no-repeat top left;
+	height: 150px;
+	width: 480px;
+	padding-top: 125px;
+	padding-right: 240px;
+	padding-left: 40px;
+	margin: 0px;
+	font-size: 2em;
+	line-height: 120%;
+}
+
+.figure {
+ /*float: left;*/
+ margin-bottom: 1em;
+}
+
+.figure p {
+background:#EEEEEE none repeat scroll 0% 0%;
+border-bottom:1px solid #CCCCCC;
+border-top:1px solid #CCCCCC;
+color:#555555;
+font-size:0.9em;
+line-height:1.6em;
+margin:0pt;
+padding:0.5em;
+}
