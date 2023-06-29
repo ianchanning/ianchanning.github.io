@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>File Handle or Directory Handle in IndexedDB</title>
+
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- import the webpage's javascript file -->
+    <script src="/script.js" type="module"></script>
+  </head>
+  <body>
+    <h1>File Handle or Directory Handle in IndexedDB</h1>
+    <ol>
+      <li>
+        Click either of the buttons and select a file or a directory. This
+        stores the resulting file or directory handle in IndexedDB.
+      </li>
+      <li>
+        Click the same button again. This retrieves the previously stored file
+        or directory handle.
+      </li>
+      <li>
+        Reload the page and click the same button again. This retrieves the
+        previously stored file or directory handle.
+      </li>
+      <li>
+        Open Chrome DevTools to inspect or delete the file or directory handle
+        as described in the
+        <a
+          href="https://developers.google.com/web/tools/chrome-devtools/storage/indexeddb#deletekvp"
+          >DevTools documentation</a
+        >.
+      </li>
+    </ol>
+
+    <button class="file" type="button">Open file</button>
+    <pre class="file"></pre>
+    <button class="directory" type="button">Open directory</button>
+    <pre class="directory"></pre>
+  </body>
+</html>
