@@ -1,0 +1,288 @@
+/* reset.css */
+/*html,body,div,span,applet,object,iframe, h1,h2,h3,h4,h5,h6,p,blockquote,pre, a,abbr,acronym,address,big,cite,code, del,dfn,em,font,img,ins,kbd,q,s,samp, small,strike,strong,sub,sup,tt,var, dl,dt,dd,ol,ul,li, fieldset,form,label,legend, table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}*/
+
+/* http://bettermotherfuckingwebsite.com/ */
+body {
+  font-family: system-ui;
+  margin: 40px auto;
+  max-width: 680px;
+  line-height: 1.6;
+  font-size: 18px;
+  color: #444;
+  padding: 0;
+}
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+/* style.css */
+h1 {
+  font-size: 25px;
+}
+#reminder {
+  bottom: 0;
+  color: #343b45;
+  font-family: mono;
+  margin: 12px 0;
+  padding: 0 20px;
+  position: absolute;
+  right: 0;
+}
+.reminder {
+  display: none;
+  padding: 0 30px;
+}
+.chker {
+  border-radius: 8px;
+  background-color: #f3f3f3;
+  padding: 1px;
+  text-align: center;
+  position: relative;
+  height: 258px;
+}
+.chker > .clock {
+  border-radius: 6px;
+  font-family: sans;
+  font-weight: 100;
+  line-height: 1;
+  margin: 70px auto 0;
+  padding: 0;
+  text-align: center;
+  width: 54%;
+}
+/*@link https://dribbble.com/shots/1012575--Freebie-Timer*/
+/*light*/
+.chker > .clock {
+  background-color: #e5e5e5;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.1) inset,
+    0 3px 0 #ffffff;
+  color: #343b45; /* text-shadow: 0px 0px 4px #fff; */
+  position: relative;
+}
+
+.chker > .clock > .time {
+  filter: blur(0.5px);
+  font-size: 500%;
+  letter-spacing: -2px;
+  margin: 0;
+  text-shadow:
+    0.5px 0px red,
+    -0.5px 0px aqua;
+}
+.chker > .clock > .pomo {
+  font-size: 100%;
+  letter-spacing: 0px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 0px 20px;
+  margin: 12px 0;
+}
+.chker > .clock > .chk {
+  font-size: 250%;
+}
+.chker > .clock > ul {
+  margin: 10px auto 0;
+  text-transform: uppercase;
+  letter-spacing: 0px;
+  padding: 0;
+  display: inline-block;
+  font-weight: 500;
+  font-family: sans-serif;
+}
+.chker > .clock > ul > li {
+  font-size: 70%;
+  float: left;
+  list-style: none;
+}
+.chker > .clock > ul > li > a {
+  padding: 0 18px;
+}
+.chker > .clock a {
+  text-decoration: none;
+  text-shadow: none;
+}
+.chker > .clock a,
+.chker > .clock a:visited {
+  color: #ccc;
+}
+.chker > .clock a.active,
+.chker > .clock a.active:visited {
+  color: #343b45;
+  text-shadow: 0px 0px 4px #fff;
+}
+/* neon */
+/*.chker > .clock.neon{text-shadow:0 0 10px #3694bb, 0 0 20px #3694bb, 0 0 30px #3694bb, 0 0 40px #28345d, 0 0 70px #28345d, 0 0 80px #28345d, 0 0 100px #28345d, 0 0 150px #28345d;}*/
+.chker > .clock.neon {
+  text-shadow:
+    0 0 5px #3694bb,
+    0 0 10px #3694bb,
+    0 0 15px #3694bb,
+    0 0 20px #28345d,
+    0 0 35px #28345d,
+    0 0 40px #28345d,
+    0 0 50px #28345d,
+    0 0 75px #28345d;
+}
+/* vintage */
+.chker > .clock.vintage {
+  text-shadow:
+    5px 5px 0 #1592ae,
+    7px 7px 0 #fff;
+}
+/* bug fix to prevent below html moving up and down slightly when the buttons are pressed */
+.buttons {
+  height: 72px; /* 70 + 2px bottom white shadow of timer */
+}
+/**
+ * @link http://webdesign.tutsplus.com/tutorials/orman-clarks-chunky-3d-web-buttons-the-css3-version--webdesign-5731
+ */
+a.button {
+  display: inline-block;
+  position: relative;
+  height: 32px;
+  width: 172px;
+  margin: 20px 8px;
+
+  text-decoration: none;
+  line-height: 32px;
+  text-align: center;
+
+  border-radius: 4px;
+}
+
+.chker:before,
+.chker:after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  height: 261px;
+  width: 680px;
+  bottom: -1px;
+  border: 1px solid #cbcbcb;
+  border-bottom: 1px solid #a5a5a5;
+
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+a.button:before,
+a.button:after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  height: 32px;
+  width: 172px;
+  bottom: -1px;
+
+  border-radius: 4px;
+}
+
+.chker:before {
+  height: 258px;
+  bottom: -4px;
+  border-top: 0;
+
+  border-radius: 0 0 8px 8px;
+}
+
+a.button:before {
+  height: 30px;
+  bottom: -4px;
+  border-top: 0;
+
+  border-radius: 0 0 4px 4px;
+
+  box-shadow: 0 1px 1px 0px #bfbfbf;
+}
+
+/* GRAY */
+.chker {
+  border-bottom: 4px solid #b2b1b1;
+}
+
+a.gray,
+a.gray:hover,
+a.gray:visited {
+  color: #555;
+  border-bottom: 4px solid #b2b1b1;
+  text-shadow: 0px 1px 0px #fafafa;
+
+  background: #eee;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(#eee),
+    to(#e2e2e2)
+  );
+  background: -moz-linear-gradient(top, #eee, #e2e2e2);
+
+  box-shadow: inset 1px 1px 0 #f5f5f5;
+}
+
+.gray:before,
+.gray:after {
+  border: 1px solid #cbcbcb;
+  border-bottom: 1px solid #a5a5a5;
+}
+
+a.gray:hover {
+  background: #e2e2e2;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    from(#e2e2e2),
+    to(#eee)
+  );
+  background: -moz-linear-gradient(top, #e2e2e2, #eee);
+}
+/* ACTIVE STATE */
+a.button:active,
+a.button-activated {
+  border: none;
+  bottom: -4px;
+  margin-bottom: 29px;
+
+  -webkit-box-shadow: 0 1px 1px #fff;
+  -moz-box-shadow: 0 1px 1px #fff;
+  box-shadow:
+    1px 1px 0 #fff,
+    inset 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+a.button:active:before,
+a.button:active:after,
+a.button-activated:before,
+a.button-activated:after {
+  border: none;
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.notifications {
+  background-color: #fff;
+  /* padding: 30px; */
+}
+blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.1);
+  font-size: 1.5em;
+  font-style: italic;
+  padding-left: 1.4em;
+}
+
+blockquote::before {
+  content: '“';
+  margin-left: -1.1em;
+  padding-right: 0.55em;
+}
+
+figcaption {
+  color: #ddd;
+}
