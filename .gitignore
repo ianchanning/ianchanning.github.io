@@ -1,2 +1,7 @@
 Session.vim
 .aider*
+
+# Ignore prompts
+CONVENTIONS.md
+GEMINI.md
+
