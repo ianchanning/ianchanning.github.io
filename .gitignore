@@ -2,6 +2,8 @@ Session.vim
 .aider*
 
 # Ignore prompts
+.cursorrules
+CLAUDE.md
 CONVENTIONS.md
 GEMINI.md
 
