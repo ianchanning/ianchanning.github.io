@@ -147,7 +147,7 @@ import { chuck } from "./chuck.js";
      * This function needs to be called once per second
      *
      * Tick down 60 seconds,
-     * then down 15 minutes
+     * then down 25 minutes
      * and then up to 100 pomodoros
      *
      * The state is stored in the HTML elements within the span.time element
@@ -156,7 +156,7 @@ import { chuck } from "./chuck.js";
     var chkIt = function () {
       chuck()
         .down(ss, 60) // seconds
-        .down(mm, 15) // minutes
+        .down(mm, 25) // minutes
         .up(pp, 100, randomNotification); // pomodoros
     };
 
