@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to TTS / FBReader Converter</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --btn-hover: #0284c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            color: var(--accent-color);
+            margin-bottom: 4px;
+        }
+
+        p.subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+
+        .box {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 250px;
+            background: #090d16;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: #0f172a;
+        }
+
+        .btn-primary:hover {
+            background: var(--btn-hover);
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .status-msg {
+            font-size: 0.8rem;
+            color: #4ade80;
+            margin-top: 4px;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Markdown to TTS & FBReader Converter</h1>
+        <p class="subtitle">Converts Headings to CAPS, expands symbols, and formats for smooth reading.</p>
+    </header>
+
+    <div class="container">
+        <!-- Input Box -->
+        <div class="box">
+            <label for="inputMd">Raw Markdown Input</label>
+            <textarea id="inputMd" placeholder="Paste your markdown here..."></textarea>
+            <div class="actions">
+                <button class="btn-primary" onclick="processText()">Convert Text</button>
+                <button class="btn-secondary" onclick="clearAll()">Clear</button>
+            </div>
+        </div>
+
+        <!-- Output Box -->
+        <div class="box">
+            <label for="outputTxt">TTS Ready Output</label>
+            <textarea id="outputTxt" readonly placeholder="Converted text will appear here..."></textarea>
+            <div class="status-msg" id="statusMsg"></div>
+            <div class="actions">
+                <button class="btn-secondary" onclick="copyOutput()">Copy Text</button>
+                <button class="btn-secondary" onclick="downloadTxt()">Download .txt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function convertMarkdownForTTS(text) {
+            // 1. Remove YAML frontmatter
+            text = text.replace(/^---[\s\S]*?---\n/m, '');
+
+            // 2. Images -> (Image: alt)
+            text = text.replace(/!\[(.*?)\]\([^\)]+\)/g, '(Image: $1)');
+
+            // 3. Links -> Link Text only
+            text = text.replace(/\[(.*?)\]\([^\)]+\)/g, '$1');
+
+            // 4. Headings -> ALL CAPS
+            text = text.replace(/^(#{1,6})\s+(.*)$/gm, (match, hashes, title) => {
+                let cleanTitle = title.replace(/[\*_`]/g, '').trim();
+                return `\n\n${cleanTitle.toUpperCase()}\n\n`;
+            });
+
+            // 5. Remove bold, italic, and code backticks
+            text = text.replace(/(\*\*|__)(.*?)\1/g, '$2');
+            text = text.replace(/(\*|_)(.*?)\1/g, '$2');
+            text = text.replace(/`([^`]+)`/g, '$1');
+
+            // 6. Blockquotes -> remove >
+            text = text.replace(/^\s*>\s*/gm, '');
+
+            // 7. TTS Expansions
+            // $50/month -> 50 dollars per month
+            text = text.replace(/\$(\d+(?:\.\d+)?)\/(\w+)/g, '$1 dollars per $2');
+
+            // $50 -> 50 dollars
+            text = text.replace(/\$(\d+(?:\.\d+)?)/g, '$1 dollars');
+
+            // 50% -> 50 percent
+            text = text.replace(/(\d+)%/g, '$1 percent');
+
+            // Short time units (25m -> 25 minutes, 15s -> 15 seconds)
+            text = text.replace(/\b(\d+)m\b/g, '$1 minutes');
+            text = text.replace(/\b(\d+)s\b/g, '$1 seconds');
+            text = text.replace(/\b(\d+)h\b/g, '$1 hours');
+
+            // Time notation (10pm -> 10 p.m.)
+            text = text.replace(/\b(\d+)(am|pm)\b/gi, '$1 $2');
+
+            // Abbreviations
+            text = text.replace(/\be\.g\.,?\b/gi, 'for example,');
+            text = text.replace(/\bi\.e\.,?\b/gi, 'that is,');
+            text = text.replace(/\betc\.\b/gi, 'and so on');
+            text = text.replace(/\bIQ\b/g, 'I Q');
+
+            // 8. Line Spacing Normalization
+            let lines = text.split('\n').map(line => line.trim());
+            text = lines.join('\n');
+            
+            // Ensure exactly one blank line between paragraphs
+            text = text.replace(/\n{3,}/g, '\n\n');
+
+            return text.trim();
+        }
+
+        function processText() {
+            const input = document.getElementById('inputMd').value;
+            const converted = convertMarkdownForTTS(input);
+            document.getElementById('outputTxt').value = converted;
+            showStatus("Converted successfully!");
+        }
+
+        function copyOutput() {
+            const outputArea = document.getElementById('outputTxt');
+            if (!outputArea.value) return;
+
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                showStatus("Copied to clipboard!");
+            }).catch(() => {
+                // Fallback for older browsers / webviews
+                outputArea.select();
+                document.execCommand('copy');
+                showStatus("Copied to clipboard!");
+            });
+        }
+
+        function downloadTxt() {
+            const text = document.getElementById('outputTxt').value;
+            if (!text) return;
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'converted-tts.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showStatus("File downloaded!");
+        }
+
+        function clearAll() {
+            document.getElementById('inputMd').value = '';
+            document.getElementById('outputTxt').value = '';
+            showStatus("");
+        }
+
+        function showStatus(msg) {
+            const status = document.getElementById('statusMsg');
+            status.textContent = msg;
+            if (msg) {
+                setTimeout(() => { status.textContent = ''; }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
