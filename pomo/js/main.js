@@ -69,7 +69,9 @@ document.querySelectorAll(".tabs a").forEach((link) => {
 });
 
 if ("Notification" in window) {
-  Notification.requestPermission();
+  Notification.requestPermission().catch((error) => {
+    console.warn("Notification permission was not granted:", error);
+  });
 }
 
 /**
@@ -157,15 +159,6 @@ const randomNotification = () => {
   fetchQuotes(fileName)
     .then((quotes) => {
       const randomQuote = quoteChooser(quotes);
-      const options = {
-        body: randomQuote,
-      };
-
-      if ("Notification" in window) {
-        const notification = new Notification(`${quoter(fileName)} says`, options);
-        window.setTimeout(() => notification.close(), 10000);
-      }
-
       const notificationsElement = document.querySelector(".notifications");
       if (notificationsElement) {
         notificationsElement.insertAdjacentHTML(
@@ -174,6 +167,17 @@ const randomNotification = () => {
         );
       } else {
         console.error('Element with class "notifications" not found.');
+      }
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          const notification = new Notification(`${quoter(fileName)} says`, {
+            body: randomQuote,
+          });
+          window.setTimeout(() => notification.close(), 10000);
+        } catch (error) {
+          console.warn("Notification could not be displayed:", error);
+        }
       }
     })
     .catch((error) => {
