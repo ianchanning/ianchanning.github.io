@@ -21,7 +21,13 @@ this file is wrong — say so rather than following it.
 
 ## Constraints discovered (these bind the plan)
 
-- **No CI.** There is no `.github/` in this repo. GitHub Pages serves `master`
+- **`pomo/` is an independent project inside the Pages site.** The repo root is
+  one level up and hosts unrelated things (`mofoforms/`, `archive/`, `files/`,
+  `index.htm`). So everything the Elm build needs — `package.json`, `elm.json`,
+  `.gitignore`, `node_modules/`, `elm-stuff/` — lives **in `pomo/`**. Nothing
+  about this port should be visible from the root, and the root `.gitignore`
+  stays site-wide.
+- **No CI.** There is no `.github/` in the repo. GitHub Pages serves `master`
   directly, so **the compiled Elm output must be committed**. This is the
   opposite of pingolin, which gitignores `public/main.js` because it builds to
   `dist/`. Do not copy pingolin's `.gitignore` blindly.
@@ -40,8 +46,8 @@ Drift here is silent and expensive, so these are checklist items, not a footnote
       `elm/random`, and `elm/http` *only if* Step 4 lands as fetch.
       Copy the version numbers from `~/external-projects/pingolin/pwa/elm.json`
       where they overlap.
-- [ ] `.gitignore` gains `pomo/elm-stuff/` and `pomo/node_modules/`.
-      It must **not** ignore the compiled output.
+- [ ] A **`pomo/.gitignore`** of its own — `elm-stuff/`, `node_modules/`,
+      `.DS_Store`. It must **not** ignore the compiled output.
 - [ ] Build is a single `elm make` invocation. **No bundler, no framework, no
       Parcel, no Vite.** If a step seems to need one, stop — it doesn't.
 
@@ -70,12 +76,14 @@ Defaults so nothing blocks. Each is cheap to reverse; the cost is stated.
 
 *Mode: setup. No behaviour changes.*
 
-- [ ] `npm init` + install Elm in `pomo/` following pingolin's `package.json`
+- [ ] `npm init` + install Elm **in `pomo/`**, following pingolin's
+      `package.json`. Nothing lands at the repo root.
 - [ ] `elm init`, then reconcile `elm.json` against the pinned list above
-- [ ] `.gitignore` entries
+- [ ] `pomo/.gitignore`
 - [ ] A `build` script that is one `elm make --output=` line
-- [ ] **Done when:** `npm run build` produces committed JS and the untouched
-      page still works
+- [ ] **Done when:** `npm run build` produces committed JS, the untouched page
+      still works, and `git status` at the repo root shows nothing new outside
+      `pomo/`
 
 `chore: elm toolchain`
 
