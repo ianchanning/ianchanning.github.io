@@ -70,6 +70,28 @@ npm 11 prints an `allow-scripts` warning because `elm`'s postinstall
 platform-specific optional dependency and `npx elm --version` works regardless.
 Do not "fix" this by running `npm approve-scripts`; nothing is broken.
 
+### 0.19.2 is brand new — trust the compiler over any model's memory
+
+0.19.1 shipped in 2019 and 0.19.2 landed roughly six years later, in July 2026.
+Any LLM working on this repo — including whichever one wrote this line — was
+almost certainly trained before it existed.
+
+The CLI is unchanged (`repl`, `init`, `reactor`, `make`, `install`, `bump`,
+`diff`), so all 0.19.1 habits transfer and this is very likely a
+maintenance/compatibility release rather than a language change. But when
+anything version-specific comes up, the order of authority is:
+
+  1. the compiler's own error message — Elm's are the best in the business and
+     they are *from this build*
+  2. `~/external-projects/guide.elm-lang.org` (pins 0.19.2) and
+     `~/external-projects/error-message-catalog`
+  3. recollection — last, and flag it as such
+
+Do not "fix" a compiler error by pattern-matching a remembered 0.19.1 idiom.
+Read what it actually says.
+
+`elm reactor` is available for poking at things without a static server.
+
 ---
 
 ## Decisions taken (reverse freely, but knowingly)
