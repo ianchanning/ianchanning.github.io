@@ -278,20 +278,64 @@ rAF, so in that binary the DOM only updates on ticks that also dispatch a `Cmd`
   — that `value (pad now.minutes)` patches like the `pomo` box observably does —
   wants ten seconds in a real browser, not another hour of Chrome flags.
 
-## Step 3 — The cast
+## Step 3 — The cast ✅ DONE
 
 *Mode: feature. Deleted cleverness per line added is highest here (§3).*
 
-- [ ] `Speaker` custom type; tab bar is a `List.map`, not five `<li>`s
-- [ ] `?says` as a flag; out-of-range falls back to random with no error path
-- [ ] Two display functions — tabs say "Rory", attribution says "Rory Breaker"
-- [ ] Live switching, URL updated one-way (§7; pingolin's `updateUrl` port is
+- [x] `Speaker` custom type; tab bar is a `List.map`, not five `<li>`s
+- [x] `?says` as a flag; out-of-range falls back to random with no error path
+- [x] Two display functions — tabs say "Rory", attribution says "Rory Breaker"
+- [x] Live switching, URL updated one-way (§7; pingolin's `updateUrl` port is
       the reference — read `src/Main.elm` and `public/app.js`)
-- [ ] Delete `quoter()`/`ucwords()` filename surgery
-- [ ] **Done when:** changing speaker mid-pomodoro no longer kills the timer
+- [x] Delete `quoter()`/`ucwords()` filename surgery
+- [x] **Done when:** changing speaker mid-pomodoro no longer kills the timer
       (a real bug fix, shipped as a feature)
 
 `feat: speaker type`
+
+### Deviations
+
+1. **Four functions on `Speaker`, not two.** §3 asks for two because it is
+   talking about the display asymmetry. `quoteFile` replaces the `files[]`
+   array and `saysIndex` replaces the URL contract, so both had to come across
+   too. No wildcard branches anywhere: adding `Bill` makes the compiler list
+   all four sites, which is the entire sales pitch.
+2. **`reward` widened to `{ file, speaker }`.** It was `()`. Elm now owns *who*
+   as well as *when*, which is what let `files`, `quotesFile`, `ucwords`,
+   `quoter`, the `.tabs a` `.active` loop and the "invalid quote file" guard all
+   die in one go. Still temporary — Steps 4 and 6 split it.
+3. **`elm/json` promoted from indirect to direct** in `elm.json`.
+   `preventDefaultOn` needs a `Decoder`. Step 4 wants it anyway.
+4. **Six messages now** (`Start`, `Started`, `Stop`, `Tick`, `ChangeSpeaker`,
+   `ChoseSpeaker`). §11's seven is a budget and Steps 4–5 still want theirs.
+   `ChangeSpeaker` and `ChoseSpeaker` are not the same event: the user's choice
+   updates the URL, the dice's choice deliberately does not.
+5. **Behaviour change: a random speaker now highlights its tab.** The old code
+   compared `?says` strings, so a bare URL matched no link and no tab lit up.
+   Silent about who is talking. Elm renders `active` from the model, so it
+   lights up. The URL is left alone, so refresh still means "surprise me".
+6. `href` stays real (`?says=N&silent=0`) and the click is intercepted with
+   `preventDefaultOn`. Right-click, middle-click and no-JS all still work.
+
+### Proof (headless, `chrome-headless-shell` + `--virtual-time-budget`)
+
+| Claim | Result |
+|---|---|
+| `?says=4` → Rory tab active | ✅ |
+| reward at t=1500 | `{"file":"rory_breaker.txt","speaker":"Rory Breaker"}` |
+| click Bacon → no navigation | ✅ `pathname` unchanged |
+| URL rewritten, `silent` preserved | ✅ `?says=0&silent=1` |
+| **reward at t=3000 after the switch** | `{"file":"bacon.txt","speaker":"Bacon"}` |
+| no `?says` → random, URL untouched | ✅ varied across runs |
+| `?says=9`, `?says=eddie` → random | ✅ no error path |
+
+That last-but-two row *is* the "done when": the timer banked its second
+pomodoro across a speaker change, which the old page could not do because
+switching speaker was a page load.
+
+The repaint caveat from Step 2 still applies — `active` and the clock digits
+read stale in headless because rAF never fires there. The model is proven
+through the port; the pixels want ten seconds in a real browser.
 
 ## Step 4 — Quotes
 
@@ -374,9 +418,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | File | Lines | Dies at |
 |---|---:|---|
 | `js/chuck.js` | 274 | Step 2 — **gone** |
-| `js/main.js` | 252 | Steps 2–7 — **185 left** after Step 2 |
+| `js/main.js` | 252 | Steps 2–7 — **143 left** after Step 3 |
 | `js/hjson.min.js` | 11 | Step 4 |
-| **Total** | **537** | **196 left** |
+| **Total** | **537** | **154 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen

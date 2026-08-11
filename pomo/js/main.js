@@ -14,36 +14,11 @@ if (!start || !stop || !reminderLink || !reminder || !alarm) {
   throw new Error("Pomodoro timer markup is incomplete.");
 }
 
-const files = [
-  "bacon.txt",
-  "eddie.txt",
-  "soap.txt",
-  "tom.txt",
-  "rory_breaker.txt",
-];
-
 const param = (key) => new URLSearchParams(window.location.search).get(key);
-
-const quotesFile = () => {
-  const requestedIndex = Number.parseInt(param("says") ?? "", 10);
-  const defaultIndex = Math.floor(Math.random() * files.length);
-  const index =
-    Number.isInteger(requestedIndex) &&
-    requestedIndex >= 0 &&
-    requestedIndex < files.length
-      ? requestedIndex
-      : defaultIndex;
-
-  return files[index];
-};
 
 const shouldPlaySound = () => !["true", "1", ""].includes(param("silent"));
 
 const fetchQuotes = async (fileName) => {
-  if (!files.includes(fileName)) {
-    throw new Error("Invalid quote file.");
-  }
-
   const response = await fetch(`quotes/${encodeURIComponent(fileName)}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch quotes: ${response.status} ${response.statusText}`);
@@ -52,13 +27,6 @@ const fetchQuotes = async (fileName) => {
   const data = await response.text();
   return Hjson.parse(`[${data}]`);
 };
-
-document.querySelectorAll(".tabs a").forEach((link) => {
-  const linkParams = new URL(link.href, document.baseURI).searchParams;
-  if (linkParams.get("says") === param("says")) {
-    link.classList.add("active");
-  }
-});
 
 if ("Notification" in window) {
   Notification.requestPermission().catch((error) => {
@@ -80,33 +48,23 @@ if ("serviceWorker" in navigator) {
 }
 
 /**
- * Convert the first letter of each word to upper case.
+ * Play the alarm and log the quote. Elm decides when and who.
  *
- * @param {string} str Lower case string
- * @return {string}
+ * @param {{file: string, speaker: string}} detail
  */
-const ucwords = (str) =>
-  `${str}`.replace(/^([a-z])|\s+([a-z])/g, (match) => match.toUpperCase());
-
-const quoter = (fileName) => {
-  const file = fileName.split(".");
-  return ucwords(file[0].replace(/_/g, " "));
-};
-
-const randomNotification = () => {
+const randomNotification = ({ file, speaker }) => {
   if (shouldPlaySound()) {
     alarm.play();
   }
 
-  const fileName = quotesFile();
-  fetchQuotes(fileName)
+  fetchQuotes(file)
     .then((quotes) => {
       const randomQuote = quoteChooser(quotes);
       const notificationsElement = document.querySelector(".notifications");
       if (notificationsElement) {
         notificationsElement.insertAdjacentHTML(
           "afterbegin",
-          formatQuote(randomQuote, quoter(fileName)),
+          formatQuote(randomQuote, speaker),
         );
       } else {
         console.error('Element with class "notifications" not found.');
@@ -114,7 +72,7 @@ const randomNotification = () => {
 
       if ("Notification" in window && Notification.permission === "granted") {
         try {
-          const notification = new Notification(`${quoter(fileName)} says`, {
+          const notification = new Notification(`${speaker} says`, {
             body: randomQuote,
           });
           window.setTimeout(() => notification.close(), 10000);
@@ -182,4 +140,4 @@ reminderLink.addEventListener("click", (event) => {
 });
 
 // Elm owns the clock now; this is all that is left of the timer here.
-document.addEventListener("pomodoro", randomNotification);
+document.addEventListener("pomodoro", (event) => randomNotification(event.detail));

@@ -3,7 +3,9 @@ port module Main exposing (Clock, clock, main, pad)
 import Browser
 import Html exposing (Html, a, audio, blockquote, button, code, div, em, fieldset, figcaption, form, h1, h3, input, li, p, source, span, text, ul)
 import Html.Attributes exposing (class, classList, disabled, href, id, readonly, src, tabindex, title, type_, value)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, preventDefaultOn)
+import Json.Decode as Decode
+import Random
 import Task
 import Time
 
@@ -11,7 +13,13 @@ import Time
 {-| Temporary. js/main.js still owns what a reward *means* until Steps 4 and 6
 split this into the quote fetch and the notify/alarm ports.
 -}
-port reward : () -> Cmd msg
+port reward : { file : String, speaker : String } -> Cmd msg
+
+
+{-| One-way, cosmetic (§7). The model is the truth; this only keeps the address
+bar shareable. pingolin's `updateUrl` is the reference.
+-}
+port updateUrl : Int -> Cmd msg
 
 
 pomodoro : Int
@@ -29,9 +37,22 @@ type Timer
     | Running Time.Posix
 
 
+type Speaker
+    = Bacon
+    | Eddie
+    | Soap
+    | Tom
+    | Rory
+
+
+type alias Flags =
+    { says : Maybe String }
+
+
 type alias Model =
     { timer : Timer
     , now : Time.Posix
+    , speaker : Speaker
     }
 
 
@@ -40,9 +61,11 @@ type Msg
     | Started Time.Posix
     | Stop
     | Tick Time.Posix
+    | ChangeSpeaker Speaker
+    | ChoseSpeaker Speaker
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.document
         { init = init
@@ -52,9 +75,24 @@ main =
         }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { timer = Idle, now = Time.millisToPosix 0 }, Cmd.none )
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    let
+        asked =
+            flags.says |> Maybe.andThen String.toInt |> Maybe.andThen speakerAt
+    in
+    ( { timer = Idle
+      , now = Time.millisToPosix 0
+      , speaker = Maybe.withDefault Bacon asked
+      }
+      -- no ?says means "surprise me", and it stays that way on refresh
+    , case asked of
+        Just _ ->
+            Cmd.none
+
+        Nothing ->
+            Random.generate ChoseSpeaker (Random.uniform Bacon [ Eddie, Soap, Tom, Rory ])
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -81,11 +119,20 @@ update msg model =
             in
             ( ticked
             , if banked ticked > banked model then
-                reward ()
+                reward
+                    { file = quoteFile model.speaker
+                    , speaker = saysName model.speaker
+                    }
 
               else
                 Cmd.none
             )
+
+        ChangeSpeaker speaker ->
+            ( { model | speaker = speaker }, updateUrl (saysIndex speaker) )
+
+        ChoseSpeaker speaker ->
+            ( { model | speaker = speaker }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -147,6 +194,107 @@ pad n =
 
 
 
+-- THE CAST (§3)
+
+
+speakers : List Speaker
+speakers =
+    [ Bacon, Eddie, Soap, Tom, Rory ]
+
+
+speakerAt : Int -> Maybe Speaker
+speakerAt index =
+    if index < 0 then
+        Nothing
+
+    else
+        List.head (List.drop index speakers)
+
+
+{-| The URL contract. Old bookmarks still work.
+-}
+saysIndex : Speaker -> Int
+saysIndex speaker =
+    case speaker of
+        Bacon ->
+            0
+
+        Eddie ->
+            1
+
+        Soap ->
+            2
+
+        Tom ->
+            3
+
+        Rory ->
+            4
+
+
+{-| What the tab says. Short enough for five of them across a phone.
+-}
+tabName : Speaker -> String
+tabName speaker =
+    case speaker of
+        Bacon ->
+            "Bacon"
+
+        Eddie ->
+            "Eddie"
+
+        Soap ->
+            "Soap"
+
+        Tom ->
+            "Tom"
+
+        Rory ->
+            "Rory"
+
+
+{-| What the attribution says. Only Rory differs, and the whole point is that
+the compiler will ask about the sixth speaker at every one of these.
+-}
+saysName : Speaker -> String
+saysName speaker =
+    case speaker of
+        Bacon ->
+            "Bacon"
+
+        Eddie ->
+            "Eddie"
+
+        Soap ->
+            "Soap"
+
+        Tom ->
+            "Tom"
+
+        Rory ->
+            "Rory Breaker"
+
+
+quoteFile : Speaker -> String
+quoteFile speaker =
+    case speaker of
+        Bacon ->
+            "bacon.txt"
+
+        Eddie ->
+            "eddie.txt"
+
+        Soap ->
+            "soap.txt"
+
+        Tom ->
+            "tom.txt"
+
+        Rory ->
+            "rory_breaker.txt"
+
+
+
 -- VIEW
 
 
@@ -163,7 +311,7 @@ view model =
             [ id "chker"
             , classList [ ( "chker", True ), ( "ticking", model.timer /= Idle ) ]
             ]
-            [ tabs
+            [ tabs model.speaker
             , timer now
             ]
         , reminder
@@ -183,15 +331,24 @@ documentTitle model now =
             pad now.minutes ++ " : " ++ pad now.seconds ++ " " ++ pad now.pomodoros ++ " - " ++ siteTitle
 
 
-tabs : Html Msg
-tabs =
-    ul [ class "tabs" ]
-        (List.indexedMap tab [ "Bacon", "Eddie", "Soap", "Tom", "Rory" ])
+tabs : Speaker -> Html Msg
+tabs current =
+    ul [ class "tabs" ] (List.map (tab current) speakers)
 
 
-tab : Int -> String -> Html Msg
-tab index name =
-    li [] [ a [ href ("?says=" ++ String.fromInt index ++ "&silent=0") ] [ text name ] ]
+{-| The href stays real so right-click, middle-click and no-JS still work; the
+click is intercepted so switching speaker no longer reloads the page.
+-}
+tab : Speaker -> Speaker -> Html Msg
+tab current speaker =
+    li []
+        [ a
+            [ href ("?says=" ++ String.fromInt (saysIndex speaker) ++ "&silent=0")
+            , classList [ ( "active", speaker == current ) ]
+            , preventDefaultOn "click" (Decode.succeed ( ChangeSpeaker speaker, True ))
+            ]
+            [ text (tabName speaker) ]
+        ]
 
 
 timer : Clock -> Html Msg
