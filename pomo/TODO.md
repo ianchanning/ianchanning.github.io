@@ -138,18 +138,56 @@ written.
 
 `chore: elm toolchain`
 
-## Step 1 — Static shell
+## Step 1 — Static shell ✅ DONE
 
 *Mode: feature. Markup only, zero logic.*
 
-- [ ] `src/Main.elm` renders today's markup — read `index.html` for the truth,
+- [x] `src/Main.elm` renders today's markup — read `index.html` for the truth,
       including every joke in a `title` attribute (§10)
-- [ ] `index.html` reduced to head, CSS, mount point, `<script src="main.js">`
-- [ ] Commit the compiled `main.js` alongside the source — no CI builds it
-- [ ] **Done when:** visually indistinguishable from before; old `js/main.js`
+- [x] `index.html` reduced to head, CSS, mount point, `<script src="main.js">`
+- [x] Commit the compiled `main.js` alongside the source — no CI builds it
+- [x] **Done when:** visually indistinguishable from before; old `js/main.js`
       still loaded and still driving the clock
 
 `feat: elm renders the shell`
+
+### Three deviations from the wording above, all forced
+
+1. **There is no mount point.** Decision 9 picked `Browser.document`, which
+   takes over `<body>` — `Elm.Main.init({})` gets no `node`. pingolin uses
+   `Browser.element` + `#elm-app`, so don't copy its `index.html` shape.
+2. **The scripts live in `<head>`, not at the end of `<body>`.** `Browser.document`
+   *virtualizes* the existing body (`_VirtualDom_virtualize(bodyNode)`) and diffs
+   the view against it, so anything in `<body>` that isn't in the view is patched
+   away — including a `<script type="module" src="js/main.js">` that has not
+   executed yet. In `<head>` Elm can't reach it. Order is `main.js` (defer) →
+   `app.js` (defer) → `js/main.js` (module): all three share the one deferred
+   list in document order, and `_Browser_makeAnimator` calls `draw(model)`
+   *synchronously*, so the DOM exists by the time `js/main.js` queries it.
+3. **`href="javascript:void(0);"` became `href="#"`.** `Html.Attributes.href`
+   runs `noJavaScriptUri`, so Elm would have silently emitted `""`. `js/main.js`
+   `preventDefault`s the click either way.
+
+Also gone: `<body class="light">` — Elm renders `<body>` with no attributes.
+Nothing uses it; the only mention is a comment in `css/style.css`, which
+`index.html` doesn't even link.
+
+### Verified end to end, not by eye
+
+Headless Chrome (the playwright cache at
+`~/Library/Caches/ms-playwright/chromium_headless_shell-1223`, no npm install
+needed) driving a throwaway `probe.html` in an iframe, since removed:
+
+    h1=DO IT  chker=true  tabs=5  reminderLink=+  alarm=true
+    notifications=true  stopTitle=Hammertime
+    before=25:00 00 → after=24:57 01   ticking=true
+    title=24 : 57 01 - Lock Stock Pomodoros : ianchanning
+    reminderOpen=block glyph=×
+    quote=“You did take care of the shotguns?”— says Soap @ 3:04 PM
+
+`pomo` reading `01` after three seconds **is the §1b t=1 payout**, reproduced
+against Elm-rendered markup. Step 2 is supposed to delete it. If a later change
+makes it vanish early, that's a regression in the proof, not a win.
 
 ## Step 2 — The timer ⭐
 
