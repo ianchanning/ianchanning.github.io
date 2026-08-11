@@ -130,6 +130,18 @@
         font-size: 80%;
         color: #999;
       }
+
+      .notifications blockquote {
+        quotes: "\201C" "\201D";
+      }
+
+      .notifications .quote::before {
+        content: open-quote;
+      }
+
+      .notifications .quote::after {
+        content: close-quote;
+      }
     </style>
     <script src="main.js" defer></script>
     <script src="app.js" defer></script>

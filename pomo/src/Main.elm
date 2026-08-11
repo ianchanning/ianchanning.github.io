@@ -1,7 +1,7 @@
-port module Main exposing (Clock, clock, main, pad)
+port module Main exposing (Clock, clock, clockTime, main, pad)
 
 import Browser
-import Html exposing (Html, a, audio, blockquote, button, code, div, em, fieldset, figcaption, form, h1, h3, input, li, p, source, span, text, ul)
+import Html exposing (Html, a, audio, blockquote, button, cite, code, div, em, fieldset, figcaption, form, h1, h3, input, li, p, source, span, text, ul)
 import Html.Attributes exposing (class, classList, disabled, href, id, readonly, src, tabindex, title, type_, value)
 import Html.Events exposing (onClick, preventDefaultOn)
 import Http
@@ -11,7 +11,8 @@ import Task
 import Time
 
 
-{-| Temporary. js/main.js still owns the log and the alarm until Steps 5 and 6.
+{-| Temporary. js/main.js still owns the alarm and the Notification API until
+Step 6.
 -}
 port reward : { quote : String, speaker : String } -> Cmd msg
 
@@ -49,11 +50,20 @@ type alias Flags =
     { says : Maybe String }
 
 
+type alias Note =
+    { quote : String
+    , speaker : Speaker
+    , at : Time.Posix
+    }
+
+
 type alias Model =
     { timer : Timer
     , now : Time.Posix
     , speaker : Speaker
     , quotes : List String
+    , notes : List Note
+    , zone : Time.Zone
     }
 
 
@@ -66,6 +76,7 @@ type Msg
     | ChoseSpeaker Speaker
     | GotQuotes (Result Http.Error String)
     | GotQuote String
+    | GotZone Time.Zone
 
 
 main : Program Flags Model Msg
@@ -88,14 +99,19 @@ init flags =
       , now = Time.millisToPosix 0
       , speaker = Maybe.withDefault Bacon asked
       , quotes = []
+      , notes = []
+      , zone = Time.utc
       }
-    , case asked of
-        Just speaker ->
-            fetchQuotes speaker
+    , Cmd.batch
+        [ Task.perform GotZone Time.here
+        , case asked of
+            Just speaker ->
+                fetchQuotes speaker
 
-        -- no ?says means "surprise me", and it stays that way on refresh
-        Nothing ->
-            Random.generate ChoseSpeaker (Random.uniform Bacon [ Eddie, Soap, Tom, Rory ])
+            -- no ?says means "surprise me", and it stays that way on refresh
+            Nothing ->
+                Random.generate ChoseSpeaker (Random.uniform Bacon [ Eddie, Soap, Tom, Rory ])
+        ]
     )
 
 
@@ -146,7 +162,14 @@ update msg model =
             ( model, Cmd.none )
 
         GotQuote quote ->
-            ( model, reward { quote = quote, speaker = saysName model.speaker } )
+            -- model.now is the tick that banked the pomodoro, so the Note is
+            -- stamped at event time. A re-render cannot relabel it.
+            ( { model | notes = Note quote model.speaker model.now :: model.notes }
+            , reward { quote = quote, speaker = saysName model.speaker }
+            )
+
+        GotZone zone ->
+            ( { model | zone = zone }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -326,12 +349,17 @@ fetchQuotes speaker =
 {-| The whole parser. One quote per line is a format, and this is elm/core.
 `quotes/*.txt` does not change by a byte, so paste-and-save still works with
 no build step.
+
+The apostrophe swap lives here rather than in `view` (§6 objected to doing it
+"on every render forever") and rather than in the source files (§4 objected to
+anything that makes a fresh paste second-class). This is the parse boundary,
+which is the closest thing to §6's "generation time" that we have.
 -}
 lines : String -> List String
 lines raw =
     raw
         |> String.lines
-        |> List.map String.trim
+        |> List.map (String.trim >> String.replace "'" "\u{2019}")
         |> List.filter (not << String.isEmpty)
 
 
@@ -346,6 +374,52 @@ pick quotes =
 
         [] ->
             Cmd.none
+
+
+
+-- THE LOG (§6)
+
+
+{-| Text is text. The quotation marks are `content: open-quote` in CSS, which
+is what CSS is for, and there is no HTML being built by hand anywhere.
+-}
+note : Time.Zone -> Note -> Html Msg
+note zone entry =
+    blockquote []
+        [ span [ class "quote" ] [ text entry.quote ]
+        , figcaption []
+            [ text ("\u{2014} says " ++ saysName entry.speaker ++ " ")
+            , cite [] [ text ("@ " ++ clockTime zone entry.at) ]
+            ]
+        ]
+
+
+{-| What `toLocaleTimeString("en-US", { hour12: true })` was giving us: 5:00 PM.
+-}
+clockTime : Time.Zone -> Time.Posix -> String
+clockTime zone at =
+    let
+        hour24 =
+            Time.toHour zone at
+
+        hour =
+            modBy 12 hour24
+    in
+    String.fromInt
+        (if hour == 0 then
+            12
+
+         else
+            hour
+        )
+        ++ ":"
+        ++ pad (Time.toMinute zone at)
+        ++ (if hour24 < 12 then
+                " AM"
+
+            else
+                " PM"
+           )
 
 
 
@@ -369,7 +443,7 @@ view model =
             , timer now
             ]
         , reminder
-        , div [ class "notifications" ] []
+        , div [ class "notifications" ] (List.map (note model.zone) model.notes)
         , alarm
         ]
     }

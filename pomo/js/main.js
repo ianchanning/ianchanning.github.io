@@ -38,20 +38,13 @@ if ("serviceWorker" in navigator) {
 }
 
 /**
- * Play the alarm and log the quote. Elm decides when, who and which quote.
+ * Play the alarm and fire the OS notification. Elm owns the log.
  *
  * @param {{quote: string, speaker: string}} detail
  */
 const randomNotification = ({ quote, speaker }) => {
   if (shouldPlaySound()) {
     alarm.play();
-  }
-
-  const notificationsElement = document.querySelector(".notifications");
-  if (notificationsElement) {
-    notificationsElement.insertAdjacentHTML("afterbegin", formatQuote(quote, speaker));
-  } else {
-    console.error('Element with class "notifications" not found.');
   }
 
   if ("Notification" in window && Notification.permission === "granted") {
@@ -62,21 +55,6 @@ const randomNotification = ({ quote, speaker }) => {
       console.warn("Notification could not be displayed:", error);
     }
   }
-};
-
-/**
- * Generate the HTML for a quote.
- *
- * @param {string} quote   The raw quote
- * @param {string} speaker Name of the quoter
- * @return {string}         HTML with paragraph and quoter beneath
- */
-const formatQuote = (quote, speaker) => {
-  const prettyQuote = quote.replace(/'/g, "&rsquo;");
-  const timeOptions = { hour: "numeric", minute: "numeric", hour12: true };
-  const formattedTime = new Date().toLocaleTimeString("en-US", timeOptions);
-
-  return `<blockquote>&ldquo;${prettyQuote}&rdquo;<figcaption>&mdash; says ${speaker} <cite>@ ${formattedTime}</cite></figcaption></blockquote>`;
 };
 
 const checkToggle = () => (timer.classList.contains("ticking") ? stop : start);

@@ -263,20 +263,40 @@ stubbed to a synthetic clock so 25 minutes takes milliseconds: quotes appeared
 at **t=1500 and t=3000 and nowhere else**. The `if (pp.value >= 1) stopTimer()`
 guard is deleted and the timer now loops forever (Decision 5).
 
-### Headless caveat — do not re-litigate this
+### Headless caveat — SOLVED at Step 5
 
 **`chrome-headless-shell` never fires `requestAnimationFrame`.** Elm repaints on
 rAF, so in that binary the DOM only updates on ticks that also dispatch a `Cmd`
 (which happens to be the reward ticks). Full `Google Chrome for Testing` with
-`--headless=new` hangs on this page. Consequences:
+`--headless=new` hangs on this page.
 
-- The Step 1 probe worked only because chuck wrote `.value` directly, and the
-  Proof harness worked only because `_Browser_makeAnimator` calls `draw(model)`
-  synchronously for the *first* frame.
-- **Per-tick repaint cannot be asserted headlessly here.** The arithmetic is
-  proven exhaustively and the reward timing is proven live; the remaining claim
-  — that `value (pad now.minutes)` patches like the `pomo` box observably does —
-  wants ten seconds in a real browser, not another hour of Chrome flags.
+**The fix, found at Step 5.** Elm's kernel binds rAF *once*, at load:
+
+```js
+var _Browser_requestAnimationFrame =
+    typeof requestAnimationFrame !== 'undefined'
+        ? requestAnimationFrame
+        : function(callback) { return setTimeout(callback, 1000 / 60); };
+```
+
+So take rAF away *before `main.js` executes* and Elm uses `setTimeout`, which
+`--virtual-time-budget` does fast-forward:
+
+```html
+<!-- injected as the first thing in <head> -->
+<script>
+  Object.defineProperty(window, "requestAnimationFrame", { value: undefined });
+  window.__off = 0;
+  const __base = 1700000000000;
+  Date.now = () => __base + window.__off;
+</script>
+```
+
+"Before `main.js` executes" rules out the iframe harness used in Steps 1–4 —
+generate a copy of `index.html` with the block injected and drive that instead.
+Step 5 read `#pomo` as `03` after three walked pomodoros, so **per-tick repaint
+is now asserted headlessly** and the Step 2/3 caveat is retired. Use this for
+the Step 7 keyboard work, which is otherwise unverifiable.
 
 ## Step 3 — The cast ✅ DONE
 
@@ -333,9 +353,9 @@ That last-but-two row *is* the "done when": the timer banked its second
 pomodoro across a speaker change, which the old page could not do because
 switching speaker was a page load.
 
-The repaint caveat from Step 2 still applies — `active` and the clock digits
-read stale in headless because rAF never fires there. The model is proven
-through the port; the pixels want ten seconds in a real browser.
+The repaint caveat from Step 2 applied at the time — `active` and the clock
+digits read stale in headless. **Step 5 solved it**; see the caveat section
+above. Re-running this probe today would show the `active` class moving.
 
 ## Step 4 — Quotes ✅ DONE
 
@@ -392,17 +412,67 @@ through the port; the pixels want ten seconds in a real browser.
 The mtime row is the whole of Decision 7: the sentinel line reached the reward
 without `elm make` running. Paste-and-save-and-reload survived the port.
 
-## Step 5 — The log
+## Step 5 — The log ✅ DONE
 
 *Mode: feature.*
 
-- [ ] `Note` records, newest first (§6)
-- [ ] `Time.here` at init; timestamp captured at event time, not render time
-- [ ] No HTML string building, no `&rsquo;` mangling — typography via CSS or
+- [x] `Note` records, newest first (§6)
+- [x] `Time.here` at init; timestamp captured at event time, not render time
+- [x] No HTML string building, no `&rsquo;` mangling — typography via CSS or
       fixed once in the source `.txt` (§6)
-- [ ] **Done when:** re-rendering can't relabel an old quote's time
+- [x] **Done when:** re-rendering can't relabel an old quote's time
 
 `feat: quote log`
+
+### Deviations
+
+1. **The apostrophe fix went into `lines`, not the source `.txt` files.**
+   §6 prefers fixing them "once, at generation time" rather than "on every
+   render forever". We have no generator, and editing the eight `.txt` files
+   would make a fresh IMDB paste render subtly differently from its
+   neighbours — a paste-ergonomics regression, which §4 says overrides
+   cleanliness. `lines` is the parse boundary, runs once per fetch rather than
+   per render, and satisfies both. **One line to move if you disagree.**
+2. **The quote text is wrapped in `<span class="quote">`.** `::after` on the
+   `blockquote` would put the closing quote mark after the `figcaption`. The
+   original DOM was `<blockquote>“quote”<figcaption>…` — the span reproduces
+   it exactly and gives the pseudo-elements something to attach to.
+3. **Nine messages** (`GotZone` added), one over §11's budget for the reasons
+   already logged at Steps 3 and 4. Model is at six fields against §11's seven,
+   and `silent` at Step 6 makes seven — on target.
+4. `&ldquo;`/`&rdquo;` became `quotes:` + `content: open-quote` in the inline
+   `<style>` in `index.html`, since `css/style.css` is not linked. `&mdash;`
+   became a literal `—` in the Elm source — it is a static label, not data.
+
+### Proof
+
+**`clockTime` vs the `toLocaleTimeString` it replaced** — a throwaway
+`src/Proof.elm` dumped all 1440 minutes of a UTC day, diffed in the browser
+against `toLocaleTimeString("en-US", { hour: "numeric", minute: "numeric",
+hour12: true })`:
+
+| | |
+|---|---|
+| rows compared | 1440 |
+| **mismatches** | **0** |
+| midnight | `12:00 AM` |
+| noon | `12:00 PM` |
+
+**The log** — three pomodoros walked from a stubbed `22:13:20 UTC`:
+
+| Claim | Result |
+|---|---|
+| newest first | `["@ 11:28 PM","@ 11:03 PM","@ 10:38 PM"]` |
+| markup | `<blockquote><span class="quote">…</span><figcaption>— says Bacon <cite>@ 11:28 PM</cite></figcaption></blockquote>` |
+| curly apostrophe, no straight one | ✅ `It’s as long as my arm.` |
+| CSS quote marks resolve | ✅ `open-quote` / `close-quote` |
+| **clock jumped ~8h, speaker switched, 2 more notes** | **old three timestamps byte-identical** |
+| old notes keep their own speaker | ✅ 2× Rory Breaker then 3× Bacon |
+
+That last pair is the "done when". The old code built `new Date()` inside
+`formatQuote` at render time, so any re-render relabelled every quote to *now*.
+Ours cannot: the `Time.Posix` is captured in the `Note`, and so is the
+`Speaker`.
 
 ## Step 6 — The edges
 
@@ -458,9 +528,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | File | Lines | Dies at |
 |---|---:|---|
 | `js/chuck.js` | 274 | Step 2 — **gone** |
-| `js/main.js` | 252 | Steps 2–7 — **116 left** after Step 4 |
+| `js/main.js` | 252 | Steps 2–7 — **94 left** after Step 5 |
 | `js/hjson.min.js` | 11 | Step 4 — **gone** |
-| **Total** | **537** | **116 left** |
+| **Total** | **537** | **94 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen
