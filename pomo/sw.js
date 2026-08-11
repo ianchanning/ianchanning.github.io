@@ -1,10 +1,11 @@
-const CACHE_NAME = "pomo-v1";
+const CACHE_NAME = "pomo-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./site.webmanifest",
+  "./main.js",
+  "./app.js",
   "./js/main.js",
-  "./js/chuck.js",
   "./js/hjson.min.js",
   "./audio/alarm-clock-01.mp3",
   "./audio/alarm-clock-01.ogg",

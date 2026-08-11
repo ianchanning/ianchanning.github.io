@@ -189,7 +189,7 @@ needed) driving a throwaway `probe.html` in an iframe, since removed:
 against Elm-rendered markup. Step 2 is supposed to delete it. If a later change
 makes it vanish early, that's a regression in the proof, not a win.
 
-## Step 2 — The timer ⭐
+## Step 2 — The timer ⭐ ✅ DONE
 
 *Mode: refactor + bug fix. **This is where the argument is won or lost.***
 
@@ -197,28 +197,86 @@ Read §1b, §1b-ii and §1c in full first. The point is not to port chuck — it
 that `//` and `modBy` **are** the carry chain, so the t=1 payout and the
 1501-second period cannot be expressed, let alone fixed.
 
-- [ ] `Timer = Idle | Running Time.Posix` (§2 option D, §11)
-- [ ] Display derived from `now - startedAt` (§1c)
-- [ ] `subscriptions` is a two-branch `case` — no `timerId`, no `clearInterval`
-- [ ] Title from `Browser.document`, deleting the childNode-scraping in
+- [x] `Timer = Idle | Running Time.Posix` (§2 option D, §11)
+- [x] Display derived from `now - startedAt` (§1c)
+- [x] `subscriptions` is a two-branch `case` — no `timerId`, no `clearInterval`
+- [x] Title from `Browser.document`, deleting the childNode-scraping in
       `main.js`'s `updateTitle`
-- [ ] Reward fires on the derived pomodoro count changing (§11)
-- [ ] **Delete `js/chuck.js`** — and read §1b-ii on why this isn't killing chuck
-- [ ] **Done when:** the proof below passes
+- [x] Reward fires on the derived pomodoro count changing (§11)
+- [x] **Delete `js/chuck.js`** — and read §1b-ii on why this isn't killing chuck
+- [x] **Done when:** the proof below passes
 
 `refactor: replace chuck with divMod`
 
-### The proof (do not skip — it is the only test this project needs)
+### What landed beyond the checklist
 
-- [ ] Rebuild the headless chuck harness. `/tmp/chucksim` was deleted; the
-      recipe is in §1b, and the elements must fake **`INPUT`**, because
-      `pomo/js/chuck.js` is a fork of upstream with `tagName` branches
-      (§1b-ii). Using `~/external-projects/chuck/chuck.js` with input objects
-      silently does nothing — that mistake already happened once.
-- [ ] Run the Elm display function over `0..3010` and diff against the chuck trace
-- [ ] **Every second matches except:** no payout at `t=1`; period is 1500 not
-      1501; `00:00` never renders
-- [ ] Expected fire ticks — chuck: `1, 1501, 3001`. Elm: `1500, 3000`.
+- **A fourth Msg, `Started Time.Posix`.** §11 lists `Start`, but deadline-based
+  timing needs `Task.perform Started Time.now` to learn the instant. §11's
+  "seven messages" is a budget, not a cap — this spends one of them early.
+- **A temporary `reward : () -> Cmd msg` port**, bridged in `app.js` to a
+  `pomodoro` CustomEvent that `js/main.js` listens for. Elm now decides *when* a
+  pomodoro lands; JS still owns *what that means* until Step 4 (quotes) and
+  Step 6 (notify/alarm). This port does not survive to Step 6's "exactly three".
+- **`sw.js` partially swept early.** `js/chuck.js` had to leave `APP_SHELL` in
+  the same commit that deleted it, so `./main.js` and `./app.js` went in at the
+  same time and `CACHE_NAME` went to `pomo-v2`. Step 8 still owns dropping
+  `./js/main.js` + `./js/hjson.min.js` and adding `quotes/*.txt`.
+- **`#chker` still gets the `ticking` class**, now rendered by Elm via
+  `classList`. That is not decoration: `js/main.js`'s space-bar `checkToggle()`
+  reads it, so the keyboard keeps working until Step 7 takes it.
+- **The minutes box is still an `<input>`** and Elm now overwrites it every
+  tick, so typing in it reverts within a second. Decision 3 already fixed
+  minutes at 25; Step 7 turns it into a non-input so it stops lying.
+- **Stop now resets the title** to the bare `Lock Stock Pomodoros : ianchanning`
+  and the clock to `25:00`, because both are functions of `Idle`. The old app
+  left the last ticked values frozen on screen.
+
+### The proof — PASSED
+
+Both halves rebuilt from scratch, since `/tmp/chucksim` had been deleted again.
+
+**chuck half.** `/tmp/chucksim.mjs`, importing `pomo/js/chuck.js` *before* it was
+deleted, with fake elements reporting `tagName: "INPUT"` and seeded `mm="25"`,
+`ss="00"`, `pp="00"` exactly as `index.html` did. This is one-shot by nature:
+after this commit the fork is gone, and `~/external-projects/chuck/chuck.js` has
+no INPUT branch, so it cannot stand in (§1b-ii).
+
+**Elm half.** A throwaway `src/Proof.elm` importing the *shipped* `clock` and
+`pad` from `Main` and rendering all 3011 lines, compiled and dumped from the
+real DOM. `Main` therefore exposes `Clock`, `clock` and `pad` — the only reason
+its exposing list isn't just `main`.
+
+Result over `0..3010`:
+
+| | chuck | Elm |
+|---|---|---|
+| fires at | `1, 1501, 3001` | `1500, 3000` |
+| ever renders `00:00` | yes | no |
+| ticks where `MM:SS` differs | — | **2** (t=1500, t=3000: `00:00` → `25:00`) |
+
+Every other second of `MM:SS` is identical, exactly as §1c predicted. The
+pomodoro column differs from t=1 onward for one reason only: chuck banked a
+phantom pomodoro on tick one. That is BUG 1, and it is now gone.
+
+Live, through the real `update` → port → `js/main.js` path, with `Date.now()`
+stubbed to a synthetic clock so 25 minutes takes milliseconds: quotes appeared
+at **t=1500 and t=3000 and nowhere else**. The `if (pp.value >= 1) stopTimer()`
+guard is deleted and the timer now loops forever (Decision 5).
+
+### Headless caveat — do not re-litigate this
+
+**`chrome-headless-shell` never fires `requestAnimationFrame`.** Elm repaints on
+rAF, so in that binary the DOM only updates on ticks that also dispatch a `Cmd`
+(which happens to be the reward ticks). Full `Google Chrome for Testing` with
+`--headless=new` hangs on this page. Consequences:
+
+- The Step 1 probe worked only because chuck wrote `.value` directly, and the
+  Proof harness worked only because `_Browser_makeAnimator` calls `draw(model)`
+  synchronously for the *first* frame.
+- **Per-tick repaint cannot be asserted headlessly here.** The arithmetic is
+  proven exhaustively and the reward timing is proven live; the remaining claim
+  — that `value (pad now.minutes)` patches like the `pomo` box observably does —
+  wants ten seconds in a real browser, not another hour of Chrome flags.
 
 ## Step 3 — The cast
 
@@ -295,10 +353,11 @@ that `//` and `modBy` **are** the carry chain, so the t=1 payout and the
 
 *Mode: cleanup.*
 
-- [ ] `sw.js` `APP_SHELL`: drop `./js/main.js`, `./js/chuck.js`,
-      `./js/hjson.min.js`; add `./main.js`, `./app.js` **and `quotes/*.txt`** —
-      Decision 7 makes offline caching of the quotes mandatory, not optional
-- [ ] Bump `CACHE_NAME` past `pomo-v1`
+- [ ] `sw.js` `APP_SHELL`: drop `./js/main.js` and `./js/hjson.min.js`; add
+      `quotes/*.txt` — Decision 7 makes offline caching of the quotes
+      mandatory, not optional. (`./js/chuck.js` already left, and `./main.js`
+      + `./app.js` already arrived, in Step 2 — see there for why.)
+- [ ] Bump `CACHE_NAME` past `pomo-v2`
 - [ ] **Delete `js/` entirely**
 - [ ] `README.md` — it currently shows the old screenshot
 - [ ] **Done when:** offline in a fresh PWA window completes a pomodoro and
@@ -314,10 +373,10 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 
 | File | Lines | Dies at |
 |---|---:|---|
-| `js/chuck.js` | 274 | Step 2 |
-| `js/main.js` | 252 | Steps 2–7 |
+| `js/chuck.js` | 274 | Step 2 — **gone** |
+| `js/main.js` | 252 | Steps 2–7 — **185 left** after Step 2 |
 | `js/hjson.min.js` | 11 | Step 4 |
-| **Total** | **537** | |
+| **Total** | **537** | **196 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen

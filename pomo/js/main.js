@@ -1,24 +1,16 @@
-import { chuck } from "./chuck.js";
 const timer = document.querySelector("#chker");
-let timerId = 0;
-const tickInterval = 1000;
-const appName = "Lock Stock Pomodoros";
-const siteName = "ianchanning";
 
 if (!timer) {
   throw new Error("Pomodoro timer element was not found.");
 }
 
-const mm = timer.querySelector(".min");
-const ss = timer.querySelector(".sec");
-const pp = timer.querySelector(".pomo");
 const start = timer.querySelector(".start");
 const stop = timer.querySelector(".stop");
 const reminderLink = document.querySelector("#reminder");
 const reminder = document.querySelector(".reminder");
 const alarm = document.querySelector("#alarm");
 
-if (!mm || !ss || !pp || !start || !stop || !reminderLink || !reminder || !alarm) {
+if (!start || !stop || !reminderLink || !reminder || !alarm) {
   throw new Error("Pomodoro timer markup is incomplete.");
 }
 
@@ -88,63 +80,6 @@ if ("serviceWorker" in navigator) {
 }
 
 /**
- * Start the timer
- *
- * Primary method that calls `updateTimer` each second
- */
-const startTimer = () => {
-  // prevent spamming the link
-  if (timerId === 0) {
-    timerId = window.setInterval(updateTimer, tickInterval);
-    timer.classList.add("ticking");
-  }
-};
-
-/**
- * Stop the timer
- */
-const stopTimer = () => {
-  window.clearInterval(timerId);
-  timerId = 0;
-  timer.classList.remove("ticking");
-};
-
-start.addEventListener("click", startTimer);
-stop.addEventListener("click", stopTimer);
-
-/**
- * Display the timer in the title.
- */
-const updateTitle = () => {
-  const timerText = Array.from(timer.querySelector(".time").childNodes)
-    .filter((node) => node.nodeName !== "A")
-    .map((node) => node.value || node.textContent.trim())
-    .join(" ");
-  document.title = `${timerText} - ${appName} : ${siteName}`;
-};
-
-/**
- * Use the chuck timer as a Pomodoro timer.
- *
- * This function needs to be called once per second. It ticks down 60 seconds,
- * then down 25 minutes, and then up to 100 pomodoros.
- */
-const chkIt = () => {
-  chuck()
-    .down(ss, 60)
-    .down(mm, 25)
-    .up(pp, 100, randomNotification);
-};
-
-/**
- * Timer callback.
- */
-const updateTimer = () => {
-  chkIt();
-  updateTitle();
-};
-
-/**
  * Convert the first letter of each word to upper case.
  *
  * @param {string} str Lower case string
@@ -159,11 +94,6 @@ const quoter = (fileName) => {
 };
 
 const randomNotification = () => {
-  // don't stop after the first notification
-  if (Number.parseInt(pp.value, 10) >= 1) {
-    stopTimer();
-  }
-
   if (shouldPlaySound()) {
     alarm.play();
   }
@@ -250,3 +180,6 @@ reminderLink.addEventListener("click", (event) => {
   reminder.style.display = isClosed ? "block" : "none";
   reminderLink.textContent = isClosed ? "×" : "+";
 });
+
+// Elm owns the clock now; this is all that is left of the timer here.
+document.addEventListener("pomodoro", randomNotification);
