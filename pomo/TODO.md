@@ -474,18 +474,76 @@ That last pair is the "done when". The old code built `new Date()` inside
 Ours cannot: the `Time.Posix` is captured in the `Note`, and so is the
 `Speaker`.
 
-## Step 6 — The edges
+## Step 6 — The edges ✅ DONE
 
 *Mode: feature. Keep the port list brutally short (§7).*
 
-- [ ] Notification port (permission + fire)
-- [ ] Alarm port calling `.play()` — not autoplay-on-render (§7)
-- [ ] `?silent` as a `Bool` with one obvious convention, fixing the backwards
+- [x] Notification port (permission + fire)
+- [x] Alarm port calling `.play()` — not autoplay-on-render (§7)
+- [x] `?silent` as a `Bool` with one obvious convention, fixing the backwards
       `!["true","1",""].includes()` logic
-- [ ] Service worker registration stays in `index.html`, untouched
-- [ ] **Done when:** exactly three ports exist and each is justified in §7
+- [x] Service worker registration stays in `index.html`, untouched
+- [x] **Done when:** exactly three ports exist and each is justified in §7
 
 `feat: notification and alarm ports`
+
+### The three ports
+
+| Port | §7 justification |
+|---|---|
+| `notify : { title, body } -> Cmd msg` | Notification API. Elm cannot. |
+| `play : () -> Cmd msg` | `<audio>.play()`. A port, not autoplay-on-render, which fights browser policy and makes `view` a liar. |
+| `updateUrl : Int -> Cmd msg` | One-way and cosmetic, per the §7 ruling that tabs switch live. |
+
+Everything else §7 listed is *not* a port: `document.title` is a field of
+`Browser.Document`, `?says`/`?silent` are flags, and the service worker
+registers itself from `index.html`.
+
+### Deviations
+
+1. **Permission is requested in `app.js`, not through the port.** §7 bundles
+   "permission + fire", but asking is a page-load concern with no model input
+   and no `Cmd` to trigger it. The port fires; `app.js` asks once at load.
+2. **The service worker registration moved into `index.html`.** §7 says it
+   "stays in `index.html`, untouched" — it was actually in `js/main.js`, which
+   Step 8 deletes. Moved verbatim.
+3. **`&silent=0` dropped from the tab hrefs.** It only existed because the old
+   logic made absent-and-loud impossible to express. Absent now means loud, so
+   it is dead weight. `?silent=0` is still *parsed* as loud, so old bookmarks
+   and old links are unaffected.
+4. **The alarm moved to the banking tick**, out of the quote path. This is the
+   caveat logged at Step 4: a failed quote fetch used to swallow the alarm as
+   well, because both lived in the one `reward` port. The pomodoro is what
+   earns the noise; the quote is a separate errand that may not arrive.
+
+### The `?silent` convention
+
+Present means silent unless you explicitly say otherwise. Verified across six
+URLs — `plays` is the number of `.play()` calls over two pomodoros:
+
+| URL | plays | notifications |
+|---|---:|---:|
+| *(absent)* | 2 | 2 |
+| `?silent=0` | 2 | 2 |
+| `?silent=false` | 2 | 2 |
+| `?silent=1` | 0 | 2 |
+| `?silent` (bare) | 0 | 2 |
+| `?silent=TRUE` | 0 | 2 |
+
+`silent` gates the audio only, never the notification — which is what the old
+`if (shouldPlaySound()) alarm.play();` did.
+
+### Proof
+
+| Claim | Result |
+|---|---|
+| exactly three ports, all subscribed | ✅ |
+| notification title and body | `Bacon says :: Are you deaf?` |
+| **quotes file missing → alarm still fires** | ✅ `plays = 2`, 0 notes, 0 notifications |
+| hrefs lost `silent=0` | ✅ `?says=0 … ?says=4` |
+| `updateUrl` preserves `silent` | ✅ `?says=0&silent=1` → `?says=4&silent=1` |
+
+**Model is now seven fields — §11's number exactly.**
 
 ## Step 7 — Keyboard, disclosure, polish
 
@@ -507,11 +565,11 @@ Ours cannot: the `Time.Posix` is captured in the `Note`, and so is the
 
 *Mode: cleanup.*
 
-- [ ] `sw.js` `APP_SHELL`: drop `./js/main.js` and `./js/hjson.min.js`; add
-      `quotes/*.txt` — Decision 7 makes offline caching of the quotes
-      mandatory, not optional. (`./js/chuck.js` already left, and `./main.js`
-      + `./app.js` already arrived, in Step 2 — see there for why.)
-- [ ] Bump `CACHE_NAME` past `pomo-v2`
+- [ ] `sw.js` `APP_SHELL`: drop `./js/main.js` — `./js/hjson.min.js` already
+      left and `quotes/*.txt` already arrived, both in Step 4. Decision 7 makes
+      offline caching of the quotes mandatory, not optional. (`./js/chuck.js`
+      left and `./main.js` + `./app.js` arrived in Step 2.)
+- [ ] Bump `CACHE_NAME` past `pomo-v3` (Step 4 bumped it to v3)
 - [ ] **Delete `js/` entirely**
 - [ ] `README.md` — it currently shows the old screenshot
 - [ ] **Done when:** offline in a fresh PWA window completes a pomodoro and
@@ -528,9 +586,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | File | Lines | Dies at |
 |---|---:|---|
 | `js/chuck.js` | 274 | Step 2 — **gone** |
-| `js/main.js` | 252 | Steps 2–7 — **94 left** after Step 5 |
+| `js/main.js` | 252 | Steps 2–7 — **47 left** after Step 6 |
 | `js/hjson.min.js` | 11 | Step 4 — **gone** |
-| **Total** | **537** | **94 left** |
+| **Total** | **537** | **47 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen

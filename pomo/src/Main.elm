@@ -11,15 +11,24 @@ import Task
 import Time
 
 
-{-| Temporary. js/main.js still owns the alarm and the Notification API until
-Step 6.
+{-| §7's three edges. Elm cannot do any of these, and there is nothing else it
+cannot do.
+
+`notify` — the Notification API. Permission is asked for once at load in
+`app.js`, because it is a page-load concern and has nothing to do with the model.
+
+`play` — `<audio>.play()`. A port rather than rendering the element only when
+firing: autoplay-on-render fights browser policy and makes `view` a liar.
+
+`updateUrl` — one-way and cosmetic. The model is the truth; this only keeps the
+address bar shareable.
 -}
-port reward : { quote : String, speaker : String } -> Cmd msg
+port notify : { title : String, body : String } -> Cmd msg
 
 
-{-| One-way, cosmetic (§7). The model is the truth; this only keeps the address
-bar shareable. pingolin's `updateUrl` is the reference.
--}
+port play : () -> Cmd msg
+
+
 port updateUrl : Int -> Cmd msg
 
 
@@ -47,7 +56,9 @@ type Speaker
 
 
 type alias Flags =
-    { says : Maybe String }
+    { says : Maybe String
+    , silent : Maybe String
+    }
 
 
 type alias Note =
@@ -64,6 +75,7 @@ type alias Model =
     , quotes : List String
     , notes : List Note
     , zone : Time.Zone
+    , silent : Bool
     }
 
 
@@ -101,6 +113,7 @@ init flags =
       , quotes = []
       , notes = []
       , zone = Time.utc
+      , silent = silentFlag flags.silent
       }
     , Cmd.batch
         [ Task.perform GotZone Time.here
@@ -139,7 +152,16 @@ update msg model =
             in
             ( ticked
             , if banked ticked > banked model then
-                pick model.quotes
+                -- The pomodoro is what earns the noise. The quote is a separate
+                -- errand and may not arrive, but the alarm still should.
+                Cmd.batch
+                    [ if model.silent then
+                        Cmd.none
+
+                      else
+                        play ()
+                    , pick model.quotes
+                    ]
 
               else
                 Cmd.none
@@ -165,7 +187,10 @@ update msg model =
             -- model.now is the tick that banked the pomodoro, so the Note is
             -- stamped at event time. A re-render cannot relabel it.
             ( { model | notes = Note quote model.speaker model.now :: model.notes }
-            , reward { quote = quote, speaker = saysName model.speaker }
+            , notify
+                { title = saysName model.speaker ++ " says"
+                , body = quote
+                }
             )
 
         GotZone zone ->
@@ -246,6 +271,20 @@ speakerAt index =
 
     else
         List.head (List.drop index speakers)
+
+
+{-| Present means silent unless you explicitly say otherwise, which reads
+forwards. The old `!["true","1",""].includes(..)` did not, which is why every
+tab link had to carry `silent=0`.
+-}
+silentFlag : Maybe String -> Bool
+silentFlag raw =
+    case raw of
+        Nothing ->
+            False
+
+        Just value ->
+            not (List.member (String.toLower value) [ "0", "false", "no" ])
 
 
 {-| The URL contract. Old bookmarks still work.
@@ -471,7 +510,7 @@ tab : Speaker -> Speaker -> Html Msg
 tab current speaker =
     li []
         [ a
-            [ href ("?says=" ++ String.fromInt (saysIndex speaker) ++ "&silent=0")
+            [ href ("?says=" ++ String.fromInt (saysIndex speaker))
             , classList [ ( "active", speaker == current ) ]
             , preventDefaultOn "click" (Decode.succeed ( ChangeSpeaker speaker, True ))
             ]
