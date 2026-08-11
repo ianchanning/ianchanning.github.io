@@ -35,21 +35,40 @@ this file is wrong — say so rather than following it.
 - **Commits go straight to `master`**, Conventional Commits style, matching the
   existing log (`feat:`, `fix:`, `refactor:`, `style:`). One commit per step.
 
-## Pinned toolchain — verify before writing any Elm
+## Pinned toolchain — DONE, verified by a successful compile
 
 Drift here is silent and expensive, so these are checklist items, not a footnote.
 
-- [ ] Elm **0.19.1** (`elm.json` `"elm-version": "0.19.1"`), installed as a
-      local devDependency exactly as pingolin does — see its `package.json`,
-      not from memory.
-- [ ] Direct deps: `elm/core`, `elm/browser`, `elm/html`, `elm/time`,
-      `elm/random`, and `elm/http` *only if* Step 4 lands as fetch.
-      Copy the version numbers from `~/external-projects/pingolin/pwa/elm.json`
-      where they overlap.
-- [ ] A **`pomo/.gitignore`** of its own — `elm-stuff/`, `node_modules/`,
-      `.DS_Store`. It must **not** ignore the compiled output.
-- [ ] Build is a single `elm make` invocation. **No bundler, no framework, no
+- [x] Elm **0.19.2**, pinned exactly (`"elm": "0.19.2-0"`, no caret) in
+      `pomo/package.json`.
+
+      **This overrides pingolin, deliberately.** pingolin runs `^0.19.1-6` and
+      an earlier draft of this file said to copy that. It was wrong: 0.19.2 is
+      an official `elm/compiler` release with Mac installers, and
+      `~/external-projects/guide.elm-lang.org` — the canonical docs — pins
+      `"elm-version": "0.19.2"` in `repl/elm.json`. The guide wins; pingolin is
+      simply older. Package versions are identical either way
+      (`elm/core` 1.0.5, `elm/browser` 1.0.2, `elm/html` 1.0.1), so only the
+      compiler differs.
+
+- [x] Direct deps installed: `elm/core`, `elm/browser`, `elm/html`, `elm/time`,
+      `elm/random`, `elm/http`. Installed up front rather than per-step, purely
+      to prove `package.elm-lang.org` is reachable — the corporate proxy is the
+      failure mode you want to discover now, not at Step 4. It resolved clean.
+- [x] `pomo/.gitignore` — `node_modules/`, `elm-stuff/`, `.DS_Store`.
+      It does **not** ignore `main.js`; that is the deliverable.
+- [x] Build is a single `elm make` invocation. **No bundler, no framework, no
       Parcel, no Vite.** If a step seems to need one, stop — it doesn't.
+- [x] Verified end to end: a throwaway `src/Main.elm` compiled under
+      `--optimize` to an 89K `main.js`, then both were deleted. Step 1 writes
+      the first real module.
+
+### Gotcha for whoever runs `npm i` again
+
+npm 11 prints an `allow-scripts` warning because `elm`'s postinstall
+(`node install.js`) is not approved. **Ignore it** — the binary arrives via a
+platform-specific optional dependency and `npx elm --version` works regardless.
+Do not "fix" this by running `npm approve-scripts`; nothing is broken.
 
 ---
 
@@ -69,21 +88,31 @@ Defaults so nothing blocks. Each is cheap to reverse; the cost is stated.
 | 8 | Tabs switch live, timer survives a speaker change | §7 | ~10 lines |
 | 9 | `Browser.document` + flags. **Not** `Browser.application` | §7 | Cheap now, expensive later |
 | 10 | `<details>` for the "+", no model state | §9 | 3 lines |
+| 11 | `pomo/main.js` = Elm output, `pomo/app.js` = port glue | below | Touches `sw.js` |
+
+**On Decision 11.** Mirrors pingolin exactly: `public/main.js` is its compiler
+output, `public/app.js` its hand-written glue. pomo's web root *is* `pomo/`, so
+they sit at `pomo/`. This matters more than it looks — an earlier draft had the
+output going to `js/app.js`, which **Step 8 would then have deleted**, taking
+the app with it. Nothing compiled ever goes in `js/`; `js/` only ever shrinks.
 
 ---
 
-## Step 0 — Toolchain
+## Step 0 — Toolchain ✅ DONE
 
 *Mode: setup. No behaviour changes.*
 
-- [ ] `npm init` + install Elm **in `pomo/`**, following pingolin's
-      `package.json`. Nothing lands at the repo root.
-- [ ] `elm init`, then reconcile `elm.json` against the pinned list above
-- [ ] `pomo/.gitignore`
-- [ ] A `build` script that is one `elm make --output=` line
-- [ ] **Done when:** `npm run build` produces committed JS, the untouched page
-      still works, and `git status` at the repo root shows nothing new outside
-      `pomo/`
+- [x] `package.json` + Elm installed **in `pomo/`**. Nothing landed at the repo
+      root — verified with `git status`.
+- [x] `elm.json` at 0.19.2 with the six direct deps
+- [x] `pomo/.gitignore`
+- [x] `npm run build` → `elm make src/Main.elm --output=main.js --optimize`
+      (plus `npm run dev`, same without `--optimize`)
+- [x] Compile verified end to end, scratch module then removed
+
+**`npm run build` will fail until Step 1 exists** — there is no `src/` yet.
+That is expected, not a broken commit: the toolchain is proven, the app is not
+written.
 
 `chore: elm toolchain`
 
@@ -93,7 +122,8 @@ Defaults so nothing blocks. Each is cheap to reverse; the cost is stated.
 
 - [ ] `src/Main.elm` renders today's markup — read `index.html` for the truth,
       including every joke in a `title` attribute (§10)
-- [ ] `index.html` reduced to head, CSS, mount point, `<script>`
+- [ ] `index.html` reduced to head, CSS, mount point, `<script src="main.js">`
+- [ ] Commit the compiled `main.js` alongside the source — no CI builds it
 - [ ] **Done when:** visually indistinguishable from before; old `js/main.js`
       still loaded and still driving the clock
 
@@ -206,7 +236,7 @@ that `//` and `modBy` **are** the carry chain, so the t=1 payout and the
 *Mode: cleanup.*
 
 - [ ] `sw.js` `APP_SHELL`: drop `./js/main.js`, `./js/chuck.js`,
-      `./js/hjson.min.js`; add the compiled output **and `quotes/*.txt`** —
+      `./js/hjson.min.js`; add `./main.js`, `./app.js` **and `quotes/*.txt`** —
       Decision 7 makes offline caching of the quotes mandatory, not optional
 - [ ] Bump `CACHE_NAME` past `pomo-v1`
 - [ ] **Delete `js/` entirely**
