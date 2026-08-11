@@ -633,7 +633,7 @@ Headless, with `requestAnimationFrame` suppressed per the recipe above.
 | Disclosure opens | height 615px, body `scrollHeight` 311 → 918 |
 | Glyph swaps | `summary::after` content `"+"` → `"×"` on `[open]` |
 
-## Step 8 — Sweep
+## Step 8 — Sweep ✅ DONE
 
 *Mode: cleanup.*
 
@@ -644,11 +644,61 @@ Headless, with `requestAnimationFrame` suppressed per the recipe above.
       `./app.js` arrived in Step 2.)
 - [x] Bump `CACHE_NAME` past `pomo-v3` — now `pomo-v4`, in Step 7
 - [x] **Delete `js/` entirely** — done in Step 7
-- [ ] `README.md` — it currently shows the old screenshot
-- [ ] **Done when:** offline in a fresh PWA window completes a pomodoro and
+- [x] `README.md` — it currently shows the old screenshot
+- [x] **Done when:** offline in a fresh PWA window completes a pomodoro and
       pays out a quote
 
 `chore: delete the javascript`
+
+### Deviations
+
+- **Two visual regressions were found by looking at the thing**, which no
+  amount of DOM assertion had caught. Both were Step 7's, both are fixed here
+  in CSS only:
+  - The `+` had dropped onto its own line. `<details>` is `display: block`, and
+    setting it to `inline` was not enough — `<summary>` is `display: list-item`
+    in the UA stylesheet, which is block-level and broke the line from the
+    inside. Both need `display: inline`. §10 wanted the `+` after Stop and for
+    one commit it was not.
+  - The digit boxes were touching. The old markup got its gaps free from
+    newlines between the `<input>`s; **Elm emits no whitespace text nodes
+    between elements**, so they vanished. This landed back at Step 1 and
+    survived seven steps of assertions unnoticed. `.time .separator` now has a
+    real margin.
+- **`chrome-headless-shell` cannot do the done-when.** `navigator.serviceWorker
+  .register()` never resolves in it — the API is present and lies. Full Chrome
+  was needed, and `--virtual-time-budget` *deadlocks* against service workers,
+  so the whole virtual-clock recipe had to go. Driven over CDP instead, on real
+  time, with a stubbed `Date.now` to jump the 25 minutes. Node 26 ships a global
+  `WebSocket`, so this needed no dependencies and nothing was added to the repo.
+- **The offline test proves it is offline.** Serving the app from cache looks
+  identical to serving it from a working network, so the probe first fetches a
+  URL nothing has ever cached; that must fail before any other result counts.
+- **The README grew two short sections.** `main.js` is committed and there is no
+  CI, so "rebuild after changing `src/`" is load-bearing and was written down
+  nowhere. Adding a quote is documented for the same reason.
+- **`mac-pwa-screenshot.png` is still untracked**, as it has been since it
+  arrived. `images/screenshot.png` was regenerated from the actual build
+  instead — the old one still showed the pre-port `fuck it do it` heading and
+  the `+` in its old position.
+
+### Proof
+
+Real Chrome 148, driven over CDP. The server is killed between priming and
+testing; `curl` confirms connection refused.
+
+| Claim | Evidence |
+|---|---|
+| Network is genuinely gone | uncached URL → `Failed to fetch` |
+| Shell served from cache | `main.js` 200, 178,706 bytes, no server running |
+| Service worker in charge | `controller=true`, `caches=["pomo-v4"]` |
+| Boots offline | `25:00`, `pomo=00` |
+| **Pomodoro completes offline** | `pomo=01`, alarm fired once |
+| **Quote paid out offline** | 1 log entry, quote + `— says Soap @ 12:38 AM` |
+| Notification fired offline | `Soap says :: "[Looks through bag…` |
+| Speaker switch works offline | Bacon's file from cache → 2nd entry, `— says Bacon` |
+| `+` sits after Stop | `sameLine=true`, summary left 269 vs Stop right 259 |
+| Disclosure opens | `open=true`, glyph `×`, blockquote 604px wide below |
 
 ---
 
@@ -673,7 +723,7 @@ messages, three types. **If it outgrows that, stop and reopen
       and one `preventDefault` the browser will not let Elm make (see Step 7)
 - [x] Timer correct per the Step 2 proof
 - [x] Adding a quote is still paste-and-save
-- [ ] Works offline in a standalone PWA window
+- [x] Works offline in a standalone PWA window
 - [x] Every `title` joke survived
 - [x] Still fuck-you simple: one screen, no settings, no streaks (§0b)
 
@@ -681,10 +731,15 @@ messages, three types. **If it outgrows that, stop and reopen
 
 Defaults above hold unless overruled — none of these block a start.
 
-- §1c — never show `00:00`? (assumed yes)
-- Q4 — minutes fixed at 25? (assumed yes; retires the chuck fork)
-- §4 — fetch vs bake in? (assumed fetch)
-- §7 — tabs live? (assumed yes)
+- §1c — never show `00:00`? (assumed yes) — **shipped as assumed**
+- Q4 — minutes fixed at 25? (assumed yes; retires the chuck fork) — **shipped**
+- §4 — fetch vs bake in? (assumed fetch) — **shipped as fetch**
+- §7 — tabs live? (assumed yes) — **shipped live**
 - §10 — tomato glyphs for the pomodoro count, or leave the third box?
   The one genuine legibility gap; the only item here that is taste, not
-  mechanism.
+  mechanism. **Still open — left as a plain box. Nothing depends on it.**
+- §8 — the space bar's `preventDefault` lives in `app.js`, because
+  `Browser.Events` listeners are passive and Elm is not permitted to cancel
+  it. **Wants a ruling; it is a two-line revert** (see Step 7's deviations).
+- The apostrophe fix lives in `lines`, not the source `.txt` files (Step 5).
+  Ruled "thats fine" in conversation, recorded here so it is not re-litigated.

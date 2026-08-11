@@ -5,3 +5,19 @@
 
 ![Screenshot](images/screenshot.png)
 
+Works offline, installs as a PWA, and keeps a log of the quotes it has paid out.
+
+## Adding a quote
+
+Paste a line into the relevant `quotes/*.txt` and save. One quote per line, no
+escaping, no build step.
+
+## Building
+
+It's [Elm](https://elm-lang.org/). There is no bundler and no CI, so the
+compiled `main.js` is committed — rebuild it after any change to `src/`:
+
+```sh
+elm make src/Main.elm --optimize --output=main.js
+```
+
