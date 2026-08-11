@@ -1,8 +1,9 @@
 port module Main exposing (Clock, clock, clockTime, main, pad)
 
 import Browser
-import Html exposing (Html, a, audio, blockquote, button, cite, code, div, em, fieldset, figcaption, form, h1, h3, input, li, p, source, span, text, ul)
-import Html.Attributes exposing (class, classList, disabled, href, id, readonly, src, tabindex, title, type_, value)
+import Browser.Events
+import Html exposing (Html, a, audio, blockquote, button, cite, details, div, em, fieldset, figcaption, form, h1, h3, li, output, p, source, span, summary, text, ul)
+import Html.Attributes exposing (attribute, class, classList, href, id, src, title, type_)
 import Html.Events exposing (onClick, preventDefaultOn)
 import Http
 import Json.Decode as Decode
@@ -83,6 +84,7 @@ type Msg
     = Start
     | Started Time.Posix
     | Stop
+    | Toggle
     | Tick Time.Posix
     | ChangeSpeaker Speaker
     | ChoseSpeaker Speaker
@@ -145,6 +147,17 @@ update msg model =
         Stop ->
             ( { model | timer = Idle }, Cmd.none )
 
+        -- The space bar asks a question the model can already answer, so it
+        -- routes back into the two branches the buttons use rather than
+        -- growing a third copy of them (§8).
+        Toggle ->
+            case model.timer of
+                Idle ->
+                    update Start model
+
+                Running _ ->
+                    update Stop model
+
         Tick now ->
             let
                 ticked =
@@ -199,12 +212,38 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.timer of
-        Idle ->
-            Sub.none
+    Sub.batch
+        [ case model.timer of
+            Idle ->
+                Sub.none
 
-        Running _ ->
-            Time.every 1000 Tick
+            Running _ ->
+                Time.every 1000 Tick
+        , Browser.Events.onKeyDown spaceBar
+        ]
+
+
+{-| A decoder that fails is a key we did not want, and `Browser.Events` sends
+nothing when it fails. No `NoOp`, no keycode table, and nothing anywhere asks
+the DOM what state the timer is in (§8).
+
+The matching `preventDefault` lives in `app.js`: `Browser.Events` registers its
+listeners `{ passive: true }` (elm/browser `Elm/Kernel/Browser.js:228`), so Elm
+is not allowed to cancel the scroll from here. What the key *means* is still
+decided in exactly one place, which is this function.
+
+-}
+spaceBar : Decode.Decoder Msg
+spaceBar =
+    Decode.field "key" Decode.string
+        |> Decode.andThen
+            (\key ->
+                if key == " " then
+                    Decode.succeed Toggle
+
+                else
+                    Decode.fail "not the space bar"
+            )
 
 
 
@@ -474,15 +513,15 @@ view model =
     { title = documentTitle model now
     , body =
         [ h1 [] [ text "DO IT" ]
-        , div
-            [ id "chker"
-            , classList [ ( "chker", True ), ( "ticking", model.timer /= Idle ) ]
-            ]
+        , div [ id "chker", class "chker" ]
             [ tabs model.speaker
             , timer now
             ]
-        , reminder
-        , div [ class "notifications" ] (List.map (note model.zone) model.notes)
+        , div
+            [ class "notifications"
+            , attribute "aria-live" "polite"
+            ]
+            (List.map (note model.zone) model.notes)
         , alarm
         ]
     }
@@ -524,36 +563,11 @@ timer now =
         [ fieldset []
             [ div [ class "clock" ]
                 [ div [ class "time" ]
-                    [ input
-                        [ id "min"
-                        , class "min"
-                        , type_ "text"
-                        , value (pad now.minutes)
-                        , title "25 minutes sitting on a wall, and if one of those minutes should accidentally fall"
-                        ]
-                        []
+                    [ digits "min" "25 minutes sitting on a wall, and if one of those minutes should accidentally fall" now.minutes
                     , span [ class "separator" ] [ text ":" ]
-                    , input
-                        [ id "sec"
-                        , class "sec"
-                        , type_ "text"
-                        , value (pad now.seconds)
-                        , disabled True
-                        , readonly True
-                        , title "tick... tick... tick..."
-                        ]
-                        []
+                    , digits "sec" "tick... tick... tick..." now.seconds
                     , span [ class "separator" ] [ text "\u{00A0}" ]
-                    , input
-                        [ id "pomo"
-                        , class "pomo"
-                        , type_ "text"
-                        , value (pad now.pomodoros)
-                        , disabled True
-                        , readonly True
-                        , title "I swear I did, like, 5 pomodoros in a row once"
-                        ]
-                        []
+                    , digits "pomo" "I swear I did, like, 5 pomodoros in a row once" now.pomodoros
                     ]
                 ]
             ]
@@ -573,48 +587,70 @@ timer now =
                     , onClick Stop
                     ]
                     [ text "Stop" ]
-
-                -- elm/virtual-dom strips `javascript:` hrefs, so this is "#"; js/main.js preventDefaults it
-                , code [] [ a [ href "#", id "reminder", tabindex -1 ] [ text "+" ] ]
+                , reminder
                 ]
             ]
         ]
 
 
+{-| `<output>` is "the result of a calculation", which is what all three of
+these are — nothing here was ever typeable, so nothing pretends to be. It
+carries an implicit polite live region, silenced one box at a time because a
+screen reader counting every second down is torture (§10). The box itself is a
+CSS border now.
+-}
+digits : String -> String -> Int -> Html Msg
+digits name hint number =
+    output
+        [ id name
+        , class name
+        , title hint
+        , attribute "aria-live" "off"
+        ]
+        [ text (pad number) ]
+
+
+{-| The browser already owns "show and hide a bit of the page", down to the
+keyboard and the accessible name. The `+` / `×` swap is a CSS rule on the
+marker; nothing here is state, so nothing here is in the model (§9).
+-}
 reminder : Html Msg
 reminder =
-    blockquote [ class "reminder" ]
-        [ p []
-            [ text "“I know, lets build a pomodoro timer with quotes from Lock Stock.”"
-            , figcaption [] [ text "— says No-one ever" ]
-            ]
-        , p []
-            [ a [ href "http://pomodorotechnique.com/get-started/" ] [ text "Reminder" ]
-            , text " to self:"
-            ]
-        , h3 [] [ text "1. “Choose a task you’d like to get done”" ]
-        , p []
-            [ text "“Pick the thing you’ve been avoiding since the Jurassic period. Doesn’t matter if it’s curing cancer or finally Googling ‘how to adult’—just pick "
-            , em [] [ text "something" ]
-            , text " before your existential dread picks for you. Pro tip: If your to-do list were a person, it’d be haunting your nightmares by now.”"
-            ]
-        , h3 [] [ text "2. “Set the pomodoro for 25 minutes”" ]
-        , p []
-            [ text "“Set a timer for 25 minutes. Yes, "
-            , em [] [ text "that" ]
-            , text " timer. The one you’ll stare at like a microwave countdown, bargaining with the universe for a meteor strike to save you from replying to emails. This isn’t a ‘small oath’—it’s a hostage negotiation with your own attention span. Spoiler: You’re both the kidnapper "
-            , em [] [ text "and" ]
-            , text " the negotiator.”"
-            ]
-        , h3 [] [ text "3. “Work on the task until the pomodoro rings”" ]
-        , p []
-            [ text "“Hyperfocus for 25 minutes. Or, more accurately: Spend 15 minutes working, 7 minutes wondering if you’re allergic to productivity, and 3 minutes writing down ‘urgent’ distractions like "
-            , em [] [ text "‘Why do I own 3 staplers?’" ]
-            , text " or "
-            , em [] [ text "‘Is my plant judging me?’" ]
-            , text " Pro move: Burn the distraction list afterward. Fire purifies all sins, including your impulse to reorganize the fridge "
-            , em [] [ text "mid-task" ]
-            , text ".”"
+    details [ class "reminder" ]
+        [ summary [ attribute "aria-label" "Pomodoro reminder" ] []
+        , blockquote []
+            [ p []
+                [ text "“I know, lets build a pomodoro timer with quotes from Lock Stock.”"
+                , figcaption [] [ text "— says No-one ever" ]
+                ]
+            , p []
+                [ a [ href "http://pomodorotechnique.com/get-started/" ] [ text "Reminder" ]
+                , text " to self:"
+                ]
+            , h3 [] [ text "1. “Choose a task you’d like to get done”" ]
+            , p []
+                [ text "“Pick the thing you’ve been avoiding since the Jurassic period. Doesn’t matter if it’s curing cancer or finally Googling ‘how to adult’—just pick "
+                , em [] [ text "something" ]
+                , text " before your existential dread picks for you. Pro tip: If your to-do list were a person, it’d be haunting your nightmares by now.”"
+                ]
+            , h3 [] [ text "2. “Set the pomodoro for 25 minutes”" ]
+            , p []
+                [ text "“Set a timer for 25 minutes. Yes, "
+                , em [] [ text "that" ]
+                , text " timer. The one you’ll stare at like a microwave countdown, bargaining with the universe for a meteor strike to save you from replying to emails. This isn’t a ‘small oath’—it’s a hostage negotiation with your own attention span. Spoiler: You’re both the kidnapper "
+                , em [] [ text "and" ]
+                , text " the negotiator.”"
+                ]
+            , h3 [] [ text "3. “Work on the task until the pomodoro rings”" ]
+            , p []
+                [ text "“Hyperfocus for 25 minutes. Or, more accurately: Spend 15 minutes working, 7 minutes wondering if you’re allergic to productivity, and 3 minutes writing down ‘urgent’ distractions like "
+                , em [] [ text "‘Why do I own 3 staplers?’" ]
+                , text " or "
+                , em [] [ text "‘Is my plant judging me?’" ]
+                , text " Pro move: Burn the distraction list afterward. Fire purifies all sins, including your impulse to reorganize the fridge "
+                , em [] [ text "mid-task" ]
+                , text ".”"
+                ]
             ]
         ]
 

@@ -224,9 +224,11 @@ that `//` and `modBy` **are** the carry chain, so the t=1 payout and the
 - **`#chker` still gets the `ticking` class**, now rendered by Elm via
   `classList`. That is not decoration: `js/main.js`'s space-bar `checkToggle()`
   reads it, so the keyboard keeps working until Step 7 takes it.
+  *(Step 7 took it. The class is gone.)*
 - **The minutes box is still an `<input>`** and Elm now overwrites it every
   tick, so typing in it reverts within a second. Decision 3 already fixed
   minutes at 25; Step 7 turns it into a non-input so it stops lying.
+  *(Step 7 made all three `<output>`.)*
 - **Stop now resets the title** to the bare `Lock Stock Pomodoros : ianchanning`
   and the clock to `25:00`, because both are functions of `Idle`. The old app
   left the last ticked values frozen on screen.
@@ -296,7 +298,11 @@ So take rAF away *before `main.js` executes* and Elm uses `setTimeout`, which
 generate a copy of `index.html` with the block injected and drive that instead.
 Step 5 read `#pomo` as `03` after three walked pomodoros, so **per-tick repaint
 is now asserted headlessly** and the Step 2/3 caveat is retired. Use this for
-the Step 7 keyboard work, which is otherwise unverifiable.
+the Step 7 keyboard work, which is otherwise unverifiable. *(Step 7 used it,
+and it held: synthetic `KeyboardEvent`s drove start/stop and `defaultPrevented`
+answered the `preventDefault` question directly. The one thing it cannot show
+is a **trusted** key press, so "focused button does not re-fire on keyup" is
+argued from `defaultPrevented`, not observed.)*
 
 ## Step 3 — The cast ✅ DONE
 
@@ -545,32 +551,99 @@ URLs — `plays` is the number of `.play()` calls over two pomodoros:
 
 **Model is now seven fields — §11's number exactly.**
 
-## Step 7 — Keyboard, disclosure, polish
+## Step 7 — Keyboard, disclosure, polish ✅ DONE
 
 *Mode: refactor + UX.*
 
-- [ ] Space via `Browser.Events`, emitting the same Msg as the button;
+- [x] Space via `Browser.Events`, emitting the same Msg as the button;
       `:active` does the press animation (§8). Check the Elm guide for
       `preventDefault` rather than guessing — it's the one fiddly bit.
-- [ ] `<details>`/`<summary>` for the reminder, no model state (§9)
-- [ ] Boxed digits become bordered spans/`<output>`; no disabled inputs
+- [x] `<details>`/`<summary>` for the reminder, no model state (§9)
+- [x] Boxed digits become bordered spans/`<output>`; no disabled inputs
       lying to assistive tech (§10)
-- [ ] `aria-live`: `off` on the clock, `polite` on the notifications (§10)
-- [ ] Confirm the focus ring survived commit `3cad920` (§10)
-- [ ] "+" stays after Stop, per the newer screenshot (§10)
+- [x] `aria-live`: `off` on the clock, `polite` on the notifications (§10)
+- [x] Confirm the focus ring survived commit `3cad920` (§10)
+- [x] "+" stays after Stop, per the newer screenshot (§10)
 
 `style: keyboard, disclosure, focus`
+
+### Deviations
+
+- **`preventDefault` cannot be done from Elm, so it is two lines of `app.js`.**
+  This was the "one fiddly bit" and the answer is not in the Elm guide — it is
+  in the kernel. `Browser.Events` registers its listeners `{ passive: true }`
+  (elm/browser `Elm/Kernel/Browser.js:228`), so a subscription is *forbidden*
+  from cancelling the scroll, not merely awkward at it. The alternative — a
+  wrapper `div` with `tabindex="-1"` + `autofocus` carrying
+  `preventDefaultOn` — was built and measured: **`autofocus` does not take
+  focus on such a div**, so before the user's first click the wrapper never
+  sees the key and space would scroll the page on the most common path.
+  `app.js` now cancels the default for `" "` and nothing else. It reads
+  nothing and remembers nothing; what the key *means* is decided only in
+  `spaceBar`. This is not logic leaking back into JavaScript, it is the same
+  class of thing as the three ports — the browser refusing Elm an API.
+  **Ruling wanted if you disagree; it is a two-line revert.**
+- **This also fixes a bug rather than just a scroll annoyance.** Without it, a
+  focused Start button + space = our `Toggle` on keydown *and* the browser's
+  native click on keyup. Stopping a running timer that way would have
+  immediately restarted it.
+- **`Toggle` recurses into `update`** rather than copying the two button
+  branches. Msg count is now 10 against §11's 7; `Toggle` is the space bar,
+  which §8 explicitly asks for.
+- **All three digit boxes became `<output>`, not just the two disabled ones.**
+  §10 says "if minutes stays editable, it stays an input" — it isn't. Nothing
+  has read a typed minute since Step 2, so an `<input>` there was the same lie
+  as the other two, just quieter. The box is a CSS border now.
+- **The `+`/`×` swap survived** after all, as `summary::after` content keyed off
+  `[open]` — §9 was willing to lose it. The summary carries an `aria-label`
+  because its glyph is decoration.
+- **The focus ring was never at risk.** `3cad920` removed `border` and
+  `border-radius` from form elements; there is no `outline: none` anywhere in
+  the tree. Nothing to restore.
+- **`<summary>` is now tabbable (`tabIndex` 0); the old `#reminder` was
+  `tabindex="-1"`.** Space is page-wide the timer's, so the disclosure opens
+  with Enter. That is strictly more keyboard-reachable than before.
+- **`js/main.js` was deleted here, not in Step 8.** Once the keyboard and the
+  disclosure moved, the whole file was dead guards. Leaving an empty file for
+  one commit is worse than moving Step 8's line up. `sw.js` came with it —
+  `APP_SHELL` would otherwise have cached a 404. **Step 8's first three items
+  are done.**
+- **`.ticking` on `#chker` is gone.** It existed only so `checkToggle()` could
+  ask the DOM what state the timer was in. `css/style.css` is not linked, so
+  nothing styled it.
+
+### Proof
+
+Headless, with `requestAnimationFrame` suppressed per the recipe above.
+
+| Claim | Evidence |
+|---|---|
+| Space starts the timer | idle `25:00` → `sec=56` after 4s |
+| Space stops it | running → `sec=00`, `min=25` |
+| Space is cancelled | `defaultPrevented=true` at document *and* at a focused button |
+| Only space is cancelled | `"a"` → `defaultPrevented=false` |
+| Buttons still work | `.stop` click → `25:00` |
+| Nothing else broke | one pomodoro banked → `pomo=01`, 1 alarm, 1 notification, 1 log entry |
+| No lies to assistive tech | `inputs=0 outputs=3 disabled/readonly=0` |
+| `aria-live` | clock `off`, notifications `polite` |
+| Jokes intact | all three `title`s present on the `<output>`s |
+| Boxed look survived | `#sec` computed `border-top-width: 1px`, `width: 20.16px` (2ch) |
+| "+" after Stop | `.buttons` children = `button, button, details` |
+| Disclosure closed by default | `details` height 24px (summary only), `h3.checkVisibility() === false` |
+| Disclosure opens | height 615px, body `scrollHeight` 311 → 918 |
+| Glyph swaps | `summary::after` content `"+"` → `"×"` on `[open]` |
 
 ## Step 8 — Sweep
 
 *Mode: cleanup.*
 
-- [ ] `sw.js` `APP_SHELL`: drop `./js/main.js` — `./js/hjson.min.js` already
-      left and `quotes/*.txt` already arrived, both in Step 4. Decision 7 makes
-      offline caching of the quotes mandatory, not optional. (`./js/chuck.js`
-      left and `./main.js` + `./app.js` arrived in Step 2.)
-- [ ] Bump `CACHE_NAME` past `pomo-v3` (Step 4 bumped it to v3)
-- [ ] **Delete `js/` entirely**
+- [x] `sw.js` `APP_SHELL`: drop `./js/main.js` — done in Step 7, which deleted
+      the file. `./js/hjson.min.js` already left and `quotes/*.txt` already
+      arrived, both in Step 4. Decision 7 makes offline caching of the quotes
+      mandatory, not optional. (`./js/chuck.js` left and `./main.js` +
+      `./app.js` arrived in Step 2.)
+- [x] Bump `CACHE_NAME` past `pomo-v3` — now `pomo-v4`, in Step 7
+- [x] **Delete `js/` entirely** — done in Step 7
 - [ ] `README.md` — it currently shows the old screenshot
 - [ ] **Done when:** offline in a fresh PWA window completes a pomodoro and
       pays out a quote
@@ -586,9 +659,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | File | Lines | Dies at |
 |---|---:|---|
 | `js/chuck.js` | 274 | Step 2 — **gone** |
-| `js/main.js` | 252 | Steps 2–7 — **47 left** after Step 6 |
+| `js/main.js` | 252 | Steps 2–7 — **gone** |
 | `js/hjson.min.js` | 11 | Step 4 — **gone** |
-| **Total** | **537** | **47 left** |
+| **Total** | **537** | **0 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen
@@ -596,12 +669,13 @@ messages, three types. **If it outgrows that, stop and reopen
 
 ## Definition of done
 
-- [ ] `js/` gone; no JavaScript but the ports, the service worker and the mount
-- [ ] Timer correct per the Step 2 proof
-- [ ] Adding a quote is still paste-and-save
+- [x] `js/` gone; no JavaScript but the ports, the service worker, the mount
+      and one `preventDefault` the browser will not let Elm make (see Step 7)
+- [x] Timer correct per the Step 2 proof
+- [x] Adding a quote is still paste-and-save
 - [ ] Works offline in a standalone PWA window
-- [ ] Every `title` joke survived
-- [ ] Still fuck-you simple: one screen, no settings, no streaks (§0b)
+- [x] Every `title` joke survived
+- [x] Still fuck-you simple: one screen, no settings, no streaks (§0b)
 
 ## Open rulings
 

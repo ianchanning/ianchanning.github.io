@@ -5423,11 +5423,11 @@ var $elm$browser$Browser$document = _Browser_document;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $author$project$Main$Bacon = 0;
 var $author$project$Main$ChoseSpeaker = function (a) {
-	return {$: 5, a: a};
+	return {$: 6, a: a};
 };
 var $author$project$Main$Eddie = 1;
 var $author$project$Main$GotZone = function (a) {
-	return {$: 8, a: a};
+	return {$: 9, a: a};
 };
 var $author$project$Main$Idle = {$: 0};
 var $author$project$Main$Rory = 4;
@@ -5444,7 +5444,7 @@ var $elm$core$Maybe$andThen = F2(
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $author$project$Main$GotQuotes = function (a) {
-	return {$: 6, a: a};
+	return {$: 7, a: a};
 };
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6557,8 +6557,9 @@ var $elm$json$Json$Decode$null = _Json_decodeNull;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$Tick = function (a) {
-	return {$: 3, a: a};
+	return {$: 4, a: a};
 };
+var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$time$Time$Every = F2(
 	function (a, b) {
 		return {$: 0, a: a, b: b};
@@ -6813,15 +6814,213 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
-	var _v0 = model.n;
-	if (!_v0.$) {
-		return $elm$core$Platform$Sub$none;
+var $elm$browser$Browser$Events$Document = 0;
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 0, a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {ak: pids, ax: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (!node) {
+		return 'd_';
 	} else {
-		return A2($elm$time$Time$every, 1000, $author$project$Main$Tick);
+		return 'w_';
 	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {ab: event, ag: key};
+	});
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (!node) {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.ak,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var event = _v0.ab;
+		var key = _v0.ag;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.ax);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, 0, 'keydown');
+var $author$project$Main$Toggle = {$: 3};
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$Main$spaceBar = A2(
+	$elm$json$Json$Decode$andThen,
+	function (key) {
+		return (key === ' ') ? $elm$json$Json$Decode$succeed($author$project$Main$Toggle) : $elm$json$Json$Decode$fail('not the space bar');
+	},
+	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+var $author$project$Main$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				function () {
+				var _v0 = model.n;
+				if (!_v0.$) {
+					return $elm$core$Platform$Sub$none;
+				} else {
+					return A2($elm$time$Time$every, 1000, $author$project$Main$Tick);
+				}
+			}(),
+				$elm$browser$Browser$Events$onKeyDown($author$project$Main$spaceBar)
+			]));
 };
 var $author$project$Main$Note = F3(
 	function (quote, speaker, at) {
@@ -6830,9 +7029,11 @@ var $author$project$Main$Note = F3(
 var $author$project$Main$Running = function (a) {
 	return {$: 1, a: a};
 };
+var $author$project$Main$Start = {$: 0};
 var $author$project$Main$Started = function (a) {
 	return {$: 1, a: a};
 };
+var $author$project$Main$Stop = {$: 2};
 var $elm$core$Basics$modBy = _Basics_modBy;
 var $author$project$Main$pomodoro = 25 * 60;
 var $author$project$Main$clock = function (secondsElapsed) {
@@ -6918,7 +7119,7 @@ var $author$project$Main$notify = _Platform_outgoingPort(
 				]));
 	});
 var $author$project$Main$GotQuote = function (a) {
-	return {$: 7, a: a};
+	return {$: 8, a: a};
 };
 var $author$project$Main$pick = function (quotes) {
 	if (quotes.b) {
@@ -6970,103 +7171,121 @@ var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$Main$updateUrl = _Platform_outgoingPort('updateUrl', $elm$json$Json$Encode$int);
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		switch (msg.$) {
-			case 0:
-				var _v1 = model.n;
-				if (!_v1.$) {
-					return _Utils_Tuple2(
-						model,
-						A2($elm$core$Task$perform, $author$project$Main$Started, $elm$time$Time$now));
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 1:
-				var now = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							y: now,
-							n: $author$project$Main$Running(now)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 2:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{n: $author$project$Main$Idle}),
-					$elm$core$Platform$Cmd$none);
-			case 3:
-				var now = msg.a;
-				var ticked = _Utils_update(
-					model,
-					{y: now});
-				return _Utils_Tuple2(
-					ticked,
-					(_Utils_cmp(
-						$author$project$Main$banked(ticked),
-						$author$project$Main$banked(model)) > 0) ? $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								model.A ? $elm$core$Platform$Cmd$none : $author$project$Main$play(0),
-								$author$project$Main$pick(model.z)
-							])) : $elm$core$Platform$Cmd$none);
-			case 4:
-				var speaker = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{z: _List_Nil, m: speaker}),
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								$author$project$Main$updateUrl(
-								$author$project$Main$saysIndex(speaker)),
-								$author$project$Main$fetchQuotes(speaker)
-							])));
-			case 5:
-				var speaker = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{z: _List_Nil, m: speaker}),
-					$author$project$Main$fetchQuotes(speaker));
-			case 6:
-				if (!msg.a.$) {
-					var raw = msg.a.a;
+		update:
+		while (true) {
+			switch (msg.$) {
+				case 0:
+					var _v1 = model.n;
+					if (!_v1.$) {
+						return _Utils_Tuple2(
+							model,
+							A2($elm$core$Task$perform, $author$project$Main$Started, $elm$time$Time$now));
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				case 1:
+					var now = msg.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								z: $author$project$Main$lines(raw)
+								y: now,
+								n: $author$project$Main$Running(now)
 							}),
 						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 7:
-				var quote = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
+				case 2:
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{n: $author$project$Main$Idle}),
+						$elm$core$Platform$Cmd$none);
+				case 3:
+					var _v2 = model.n;
+					if (!_v2.$) {
+						var $temp$msg = $author$project$Main$Start,
+							$temp$model = model;
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
+					} else {
+						var $temp$msg = $author$project$Main$Stop,
+							$temp$model = model;
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
+					}
+				case 4:
+					var now = msg.a;
+					var ticked = _Utils_update(
 						model,
-						{
-							F: A2(
-								$elm$core$List$cons,
-								A3($author$project$Main$Note, quote, model.m, model.y),
-								model.F)
-						}),
-					$author$project$Main$notify(
-						{
-							O: quote,
-							W: $author$project$Main$saysName(model.m) + ' says'
-						}));
-			default:
-				var zone = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{N: zone}),
-					$elm$core$Platform$Cmd$none);
+						{y: now});
+					return _Utils_Tuple2(
+						ticked,
+						(_Utils_cmp(
+							$author$project$Main$banked(ticked),
+							$author$project$Main$banked(model)) > 0) ? $elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									model.A ? $elm$core$Platform$Cmd$none : $author$project$Main$play(0),
+									$author$project$Main$pick(model.z)
+								])) : $elm$core$Platform$Cmd$none);
+				case 5:
+					var speaker = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{z: _List_Nil, m: speaker}),
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									$author$project$Main$updateUrl(
+									$author$project$Main$saysIndex(speaker)),
+									$author$project$Main$fetchQuotes(speaker)
+								])));
+				case 6:
+					var speaker = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{z: _List_Nil, m: speaker}),
+						$author$project$Main$fetchQuotes(speaker));
+				case 7:
+					if (!msg.a.$) {
+						var raw = msg.a.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									z: $author$project$Main$lines(raw)
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				case 8:
+					var quote = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								F: A2(
+									$elm$core$List$cons,
+									A3($author$project$Main$Note, quote, model.m, model.y),
+									model.F)
+							}),
+						$author$project$Main$notify(
+							{
+								O: quote,
+								W: $author$project$Main$saysName(model.m) + ' says'
+							}));
+				default:
+					var zone = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{N: zone}),
+						$elm$core$Platform$Cmd$none);
+			}
 		}
 	});
 var $elm$html$Html$audio = _VirtualDom_node('audio');
@@ -7111,21 +7330,15 @@ var $author$project$Main$alarm = A2(
 				]),
 			_List_Nil)
 		]));
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$html$Html$Attributes$classList = function (classes) {
-	return $elm$html$Html$Attributes$class(
-		A2(
-			$elm$core$String$join,
-			' ',
-			A2(
-				$elm$core$List$map,
-				$elm$core$Tuple$first,
-				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
-};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$String$cons = _String_cons;
 var $elm$core$String$fromChar = function (_char) {
@@ -7171,7 +7384,6 @@ var $author$project$Main$documentTitle = F2(
 		}
 	});
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$html$Html$blockquote = _VirtualDom_node('blockquote');
 var $elm$html$Html$cite = _VirtualDom_node('cite');
 var $elm$time$Time$flooredDiv = F2(
@@ -7278,148 +7490,29 @@ var $author$project$Main$note = F2(
 						]))
 				]));
 	});
+var $author$project$Main$ChangeSpeaker = function (a) {
+	return {$: 5, a: a};
+};
 var $elm$html$Html$a = _VirtualDom_node('a');
-var $elm$html$Html$em = _VirtualDom_node('em');
-var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
-};
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $author$project$Main$reminder = A2(
-	$elm$html$Html$blockquote,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('reminder')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$p,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('“I know, lets build a pomodoro timer with quotes from Lock Stock.”'),
-					A2(
-					$elm$html$Html$figcaption,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('— says No-one ever')
-						]))
-				])),
-			A2(
-			$elm$html$Html$p,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$a,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$href('http://pomodorotechnique.com/get-started/')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Reminder')
-						])),
-					$elm$html$Html$text(' to self:')
-				])),
-			A2(
-			$elm$html$Html$h3,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('1. “Choose a task you’d like to get done”')
-				])),
-			A2(
-			$elm$html$Html$p,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('“Pick the thing you’ve been avoiding since the Jurassic period. Doesn’t matter if it’s curing cancer or finally Googling ‘how to adult’—just pick '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('something')
-						])),
-					$elm$html$Html$text(' before your existential dread picks for you. Pro tip: If your to-do list were a person, it’d be haunting your nightmares by now.”')
-				])),
-			A2(
-			$elm$html$Html$h3,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('2. “Set the pomodoro for 25 minutes”')
-				])),
-			A2(
-			$elm$html$Html$p,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('“Set a timer for 25 minutes. Yes, '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('that')
-						])),
-					$elm$html$Html$text(' timer. The one you’ll stare at like a microwave countdown, bargaining with the universe for a meteor strike to save you from replying to emails. This isn’t a ‘small oath’—it’s a hostage negotiation with your own attention span. Spoiler: You’re both the kidnapper '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('and')
-						])),
-					$elm$html$Html$text(' the negotiator.”')
-				])),
-			A2(
-			$elm$html$Html$h3,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('3. “Work on the task until the pomodoro rings”')
-				])),
-			A2(
-			$elm$html$Html$p,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('“Hyperfocus for 25 minutes. Or, more accurately: Spend 15 minutes working, 7 minutes wondering if you’re allergic to productivity, and 3 minutes writing down ‘urgent’ distractions like '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('‘Why do I own 3 staplers?’')
-						])),
-					$elm$html$Html$text(' or '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('‘Is my plant judging me?’')
-						])),
-					$elm$html$Html$text(' Pro move: Burn the distraction list afterward. Fire purifies all sins, including your impulse to reorganize the fridge '),
-					A2(
-					$elm$html$Html$em,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('mid-task')
-						])),
-					$elm$html$Html$text('.”')
-				]))
-		]));
-var $author$project$Main$ChangeSpeaker = function (a) {
-	return {$: 4, a: a};
 };
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
@@ -7496,22 +7589,28 @@ var $author$project$Main$tabs = function (current) {
 			$author$project$Main$tab(current),
 			$author$project$Main$speakers));
 };
-var $author$project$Main$Start = {$: 0};
-var $author$project$Main$Stop = {$: 2};
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$code = _VirtualDom_node('code');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
+var $elm$html$Html$output = _VirtualDom_node('output');
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $author$project$Main$digits = F3(
+	function (name, hint, number) {
 		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
+			$elm$html$Html$output,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id(name),
+					$elm$html$Html$Attributes$class(name),
+					$elm$html$Html$Attributes$title(hint),
+					A2($elm$html$Html$Attributes$attribute, 'aria-live', 'off')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					$author$project$Main$pad(number))
+				]));
 	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$fieldset = _VirtualDom_node('fieldset');
 var $elm$html$Html$form = _VirtualDom_node('form');
-var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
 };
@@ -7528,15 +7627,154 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$html$Html$Attributes$readonly = $elm$html$Html$Attributes$boolProperty('readOnly');
-var $elm$html$Html$Attributes$tabindex = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'tabIndex',
-		$elm$core$String$fromInt(n));
-};
-var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$details = _VirtualDom_node('details');
+var $elm$html$Html$em = _VirtualDom_node('em');
+var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$summary = _VirtualDom_node('summary');
+var $author$project$Main$reminder = A2(
+	$elm$html$Html$details,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('reminder')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$summary,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Pomodoro reminder')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$blockquote,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('“I know, lets build a pomodoro timer with quotes from Lock Stock.”'),
+							A2(
+							$elm$html$Html$figcaption,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('— says No-one ever')
+								]))
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('http://pomodorotechnique.com/get-started/')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Reminder')
+								])),
+							$elm$html$Html$text(' to self:')
+						])),
+					A2(
+					$elm$html$Html$h3,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('1. “Choose a task you’d like to get done”')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('“Pick the thing you’ve been avoiding since the Jurassic period. Doesn’t matter if it’s curing cancer or finally Googling ‘how to adult’—just pick '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('something')
+								])),
+							$elm$html$Html$text(' before your existential dread picks for you. Pro tip: If your to-do list were a person, it’d be haunting your nightmares by now.”')
+						])),
+					A2(
+					$elm$html$Html$h3,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('2. “Set the pomodoro for 25 minutes”')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('“Set a timer for 25 minutes. Yes, '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('that')
+								])),
+							$elm$html$Html$text(' timer. The one you’ll stare at like a microwave countdown, bargaining with the universe for a meteor strike to save you from replying to emails. This isn’t a ‘small oath’—it’s a hostage negotiation with your own attention span. Spoiler: You’re both the kidnapper '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('and')
+								])),
+							$elm$html$Html$text(' the negotiator.”')
+						])),
+					A2(
+					$elm$html$Html$h3,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('3. “Work on the task until the pomodoro rings”')
+						])),
+					A2(
+					$elm$html$Html$p,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('“Hyperfocus for 25 minutes. Or, more accurately: Spend 15 minutes working, 7 minutes wondering if you’re allergic to productivity, and 3 minutes writing down ‘urgent’ distractions like '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('‘Why do I own 3 staplers?’')
+								])),
+							$elm$html$Html$text(' or '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('‘Is my plant judging me?’')
+								])),
+							$elm$html$Html$text(' Pro move: Burn the distraction list afterward. Fire purifies all sins, including your impulse to reorganize the fridge '),
+							A2(
+							$elm$html$Html$em,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('mid-task')
+								])),
+							$elm$html$Html$text('.”')
+						]))
+				]))
+		]));
 var $author$project$Main$timer = function (now) {
 	return A2(
 		$elm$html$Html$form,
@@ -7564,18 +7802,7 @@ var $author$project$Main$timer = function (now) {
 									]),
 								_List_fromArray(
 									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$id('min'),
-												$elm$html$Html$Attributes$class('min'),
-												$elm$html$Html$Attributes$type_('text'),
-												$elm$html$Html$Attributes$value(
-												$author$project$Main$pad(now.L)),
-												$elm$html$Html$Attributes$title('25 minutes sitting on a wall, and if one of those minutes should accidentally fall')
-											]),
-										_List_Nil),
+										A3($author$project$Main$digits, 'min', '25 minutes sitting on a wall, and if one of those minutes should accidentally fall', now.L),
 										A2(
 										$elm$html$Html$span,
 										_List_fromArray(
@@ -7586,20 +7813,7 @@ var $author$project$Main$timer = function (now) {
 											[
 												$elm$html$Html$text(':')
 											])),
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$id('sec'),
-												$elm$html$Html$Attributes$class('sec'),
-												$elm$html$Html$Attributes$type_('text'),
-												$elm$html$Html$Attributes$value(
-												$author$project$Main$pad(now.M)),
-												$elm$html$Html$Attributes$disabled(true),
-												$elm$html$Html$Attributes$readonly(true),
-												$elm$html$Html$Attributes$title('tick... tick... tick...')
-											]),
-										_List_Nil),
+										A3($author$project$Main$digits, 'sec', 'tick... tick... tick...', now.M),
 										A2(
 										$elm$html$Html$span,
 										_List_fromArray(
@@ -7610,20 +7824,7 @@ var $author$project$Main$timer = function (now) {
 											[
 												$elm$html$Html$text('\u00A0')
 											])),
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$id('pomo'),
-												$elm$html$Html$Attributes$class('pomo'),
-												$elm$html$Html$Attributes$type_('text'),
-												$elm$html$Html$Attributes$value(
-												$author$project$Main$pad(now.G)),
-												$elm$html$Html$Attributes$disabled(true),
-												$elm$html$Html$Attributes$readonly(true),
-												$elm$html$Html$Attributes$title('I swear I did, like, 5 pomodoros in a row once')
-											]),
-										_List_Nil)
+										A3($author$project$Main$digits, 'pomo', 'I swear I did, like, 5 pomodoros in a row once', now.G)
 									]))
 							]))
 					])),
@@ -7666,24 +7867,7 @@ var $author$project$Main$timer = function (now) {
 									[
 										$elm$html$Html$text('Stop')
 									])),
-								A2(
-								$elm$html$Html$code,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$a,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$href('#'),
-												$elm$html$Html$Attributes$id('reminder'),
-												$elm$html$Html$Attributes$tabindex(-1)
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('+')
-											]))
-									]))
+								$author$project$Main$reminder
 							]))
 					]))
 			]));
@@ -7706,26 +7890,19 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$id('chker'),
-						$elm$html$Html$Attributes$classList(
-						_List_fromArray(
-							[
-								_Utils_Tuple2('chker', true),
-								_Utils_Tuple2(
-								'ticking',
-								!_Utils_eq(model.n, $author$project$Main$Idle))
-							]))
+						$elm$html$Html$Attributes$class('chker')
 					]),
 				_List_fromArray(
 					[
 						$author$project$Main$tabs(model.m),
 						$author$project$Main$timer(now)
 					])),
-				$author$project$Main$reminder,
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('notifications')
+						$elm$html$Html$Attributes$class('notifications'),
+						A2($elm$html$Html$Attributes$attribute, 'aria-live', 'polite')
 					]),
 				A2(
 					$elm$core$List$map,

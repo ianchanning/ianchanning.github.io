@@ -11,6 +11,16 @@ if ("Notification" in window) {
   });
 }
 
+// Elm decides what the space bar *means*; this only says it does not also
+// scroll the page and re-press whichever button happens to have focus.
+// `Browser.Events` listeners are registered `{ passive: true }`, so Elm cannot
+// cancel this itself. Nothing is read, nothing is remembered.
+document.addEventListener("keydown", (event) => {
+  if (event.key === " ") {
+    event.preventDefault();
+  }
+});
+
 app.ports.notify.subscribe(({ title, body }) => {
   if (!("Notification" in window) || Notification.permission !== "granted") {
     return;

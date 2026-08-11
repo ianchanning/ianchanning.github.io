@@ -116,13 +116,32 @@
       }
     </style>
     <style type="text/css">
-      .reminder {
+      .reminder > summary {
+        cursor: pointer;
+        font-family: ui-monospace, monospace;
+        list-style: none;
+      }
+
+      .reminder > summary::-webkit-details-marker {
         display: none;
+      }
+
+      .reminder > summary::after {
+        content: "+";
+      }
+
+      .reminder[open] > summary::after {
+        content: "\00D7";
       }
 
       #min,
       #sec,
       #pomo {
+        border: 1px solid #767676;
+        display: inline-block;
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 0.5rem 1rem;
         width: 2ch;
       }
 
@@ -145,7 +164,6 @@
     </style>
     <script src="main.js" defer></script>
     <script src="app.js" defer></script>
-    <script type="module" src="js/main.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
