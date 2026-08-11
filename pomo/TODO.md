@@ -337,20 +337,60 @@ The repaint caveat from Step 2 still applies — `active` and the clock digits
 read stale in headless because rAF never fires there. The model is proven
 through the port; the pixels want ten seconds in a real browser.
 
-## Step 4 — Quotes
+## Step 4 — Quotes ✅ DONE
 
 *Mode: feature. Guard §0b: paste ergonomics beat cleanliness.*
 
-- [ ] Fetch + `String.lines`, filtering blanks (§4B)
-- [ ] Prefetch at init — never at the moment of reward
-- [ ] `Random.uniform` fed by a cons-cell match, so "no quotes" needs no
+- [x] Fetch + `String.lines`, filtering blanks (§4B)
+- [x] Prefetch at init — never at the moment of reward
+- [x] `Random.uniform` fed by a cons-cell match, so "no quotes" needs no
       invented fallback (§4)
-- [ ] Speaker and quote randomness both become `Cmd` (§5)
-- [ ] **Delete `js/hjson.min.js`**
-- [ ] **Done when:** pasting a new line into `quotes/bacon.txt` and reloading
+- [x] Speaker and quote randomness both become `Cmd` (§5)
+- [x] **Delete `js/hjson.min.js`**
+- [x] **Done when:** pasting a new line into `quotes/bacon.txt` and reloading
       shows it — **no build step.** If a build step crept in, Decision 7 broke.
 
 `feat: quotes without hjson`
+
+### Deviations
+
+1. **`lines` trims before filtering.** §4B says `not << String.isEmpty`; a
+   whitespace-only line survives that and would have shipped a blank quote.
+   `String.trim` first, which also eats a stray `\r` from a Windows paste.
+   Strictly more forgiving to the paste, which is the point of §4.
+2. **`reward` narrowed from `{ file, speaker }` to `{ quote, speaker }`.**
+   Elm now picks the quote, so JS never sees a filename again. Still temporary:
+   Steps 5 and 6 split the log from the alarm and this port dies.
+3. **`GotQuotes (Err _)` is silent.** No error UI exists and §4 says the honest
+   answer to "no quotes" is "don't fire a reward". Consequence worth naming:
+   **a failed fetch currently also swallows the alarm**, because the alarm is
+   inside the same port. Step 6 gives the alarm its own port and fixes that —
+   the pomodoro completed either way and should still make a noise.
+4. **Eight messages** (`GotQuotes`, `GotQuote` added). §11 budgeted seven and
+   `GotZone` is still owed at Step 5. Reasons on the record: `Started` is
+   required by `Task.perform`, and `ChangeSpeaker`/`ChoseSpeaker` differ by
+   whether the URL is rewritten. Nothing here is a stored derived value, which
+   is the constraint §11 actually cared about.
+5. **Quote files added to the service worker's `APP_SHELL`**, `CACHE_NAME`
+   bumped to `pomo-v3`. §4 chose B partly because it "keeps the app honestly
+   offline-first via the service worker". `sw.js` is network-first, so without
+   this a fresh offline install has a working timer and no quotes.
+   Only the five in use — `bacon2`/`bill`/`lockstock` stay out of scope (§3).
+
+### Proof (headless, 40 rewards per run)
+
+| Claim | Result |
+|---|---|
+| quotes come from the file, prefetched | ✅ 15 distinct of 18 in 40 draws |
+| apostrophes survive (`Don't`, `I'm`, `c'mon`) | ✅ verbatim |
+| §4's named hjson stress case, `"Too late, too late"` mid-sentence | ✅ verbatim |
+| **paste a line, reload → drawn** | ✅ and `main.js` mtime **unchanged** |
+| blank and whitespace-only lines | ✅ never drawn |
+| missing quote file (404) | ✅ 0 rewards, no crash |
+| switch speaker → refetch | ✅ 6× Bacon then 6× Rory Breaker |
+
+The mtime row is the whole of Decision 7: the sentinel line reached the reward
+without `elm make` running. Paste-and-save-and-reload survived the port.
 
 ## Step 5 — The log
 
@@ -418,9 +458,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | File | Lines | Dies at |
 |---|---:|---|
 | `js/chuck.js` | 274 | Step 2 — **gone** |
-| `js/main.js` | 252 | Steps 2–7 — **143 left** after Step 3 |
-| `js/hjson.min.js` | 11 | Step 4 |
-| **Total** | **537** | **154 left** |
+| `js/main.js` | 252 | Steps 2–7 — **116 left** after Step 4 |
+| `js/hjson.min.js` | 11 | Step 4 — **gone** |
+| **Total** | **537** | **116 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
 messages, three types. **If it outgrows that, stop and reopen

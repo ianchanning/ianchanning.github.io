@@ -4,16 +4,16 @@ import Browser
 import Html exposing (Html, a, audio, blockquote, button, code, div, em, fieldset, figcaption, form, h1, h3, input, li, p, source, span, text, ul)
 import Html.Attributes exposing (class, classList, disabled, href, id, readonly, src, tabindex, title, type_, value)
 import Html.Events exposing (onClick, preventDefaultOn)
+import Http
 import Json.Decode as Decode
 import Random
 import Task
 import Time
 
 
-{-| Temporary. js/main.js still owns what a reward *means* until Steps 4 and 6
-split this into the quote fetch and the notify/alarm ports.
+{-| Temporary. js/main.js still owns the log and the alarm until Steps 5 and 6.
 -}
-port reward : { file : String, speaker : String } -> Cmd msg
+port reward : { quote : String, speaker : String } -> Cmd msg
 
 
 {-| One-way, cosmetic (§7). The model is the truth; this only keeps the address
@@ -53,6 +53,7 @@ type alias Model =
     { timer : Timer
     , now : Time.Posix
     , speaker : Speaker
+    , quotes : List String
     }
 
 
@@ -63,6 +64,8 @@ type Msg
     | Tick Time.Posix
     | ChangeSpeaker Speaker
     | ChoseSpeaker Speaker
+    | GotQuotes (Result Http.Error String)
+    | GotQuote String
 
 
 main : Program Flags Model Msg
@@ -84,12 +87,13 @@ init flags =
     ( { timer = Idle
       , now = Time.millisToPosix 0
       , speaker = Maybe.withDefault Bacon asked
+      , quotes = []
       }
-      -- no ?says means "surprise me", and it stays that way on refresh
     , case asked of
-        Just _ ->
-            Cmd.none
+        Just speaker ->
+            fetchQuotes speaker
 
+        -- no ?says means "surprise me", and it stays that way on refresh
         Nothing ->
             Random.generate ChoseSpeaker (Random.uniform Bacon [ Eddie, Soap, Tom, Rory ])
     )
@@ -119,20 +123,30 @@ update msg model =
             in
             ( ticked
             , if banked ticked > banked model then
-                reward
-                    { file = quoteFile model.speaker
-                    , speaker = saysName model.speaker
-                    }
+                pick model.quotes
 
               else
                 Cmd.none
             )
 
         ChangeSpeaker speaker ->
-            ( { model | speaker = speaker }, updateUrl (saysIndex speaker) )
+            ( { model | speaker = speaker, quotes = [] }
+            , Cmd.batch [ updateUrl (saysIndex speaker), fetchQuotes speaker ]
+            )
 
         ChoseSpeaker speaker ->
-            ( { model | speaker = speaker }, Cmd.none )
+            ( { model | speaker = speaker, quotes = [] }, fetchQuotes speaker )
+
+        GotQuotes (Ok raw) ->
+            ( { model | quotes = lines raw }, Cmd.none )
+
+        -- No quotes means no reward. There is nothing honest to invent here,
+        -- and the service worker is what stops it happening offline.
+        GotQuotes (Err _) ->
+            ( model, Cmd.none )
+
+        GotQuote quote ->
+            ( model, reward { quote = quote, speaker = saysName model.speaker } )
 
 
 subscriptions : Model -> Sub Msg
@@ -292,6 +306,46 @@ quoteFile speaker =
 
         Rory ->
             "rory_breaker.txt"
+
+
+
+-- QUOTES (§4)
+
+
+{-| Prefetched at init and on every speaker change, never at the moment of
+reward. We have twenty-five minutes of warning.
+-}
+fetchQuotes : Speaker -> Cmd Msg
+fetchQuotes speaker =
+    Http.get
+        { url = "quotes/" ++ quoteFile speaker
+        , expect = Http.expectString GotQuotes
+        }
+
+
+{-| The whole parser. One quote per line is a format, and this is elm/core.
+`quotes/*.txt` does not change by a byte, so paste-and-save still works with
+no build step.
+-}
+lines : String -> List String
+lines raw =
+    raw
+        |> String.lines
+        |> List.map String.trim
+        |> List.filter (not << String.isEmpty)
+
+
+{-| `Random.uniform` wants a non-empty pair, so the cons match and the
+generator agree exactly and no fallback quote has to be invented (§4).
+-}
+pick : List String -> Cmd Msg
+pick quotes =
+    case quotes of
+        first :: rest ->
+            Random.generate GotQuote (Random.uniform first rest)
+
+        [] ->
+            Cmd.none
 
 
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "pomo-v2";
+const CACHE_NAME = "pomo-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,7 +6,11 @@ const APP_SHELL = [
   "./main.js",
   "./app.js",
   "./js/main.js",
-  "./js/hjson.min.js",
+  "./quotes/bacon.txt",
+  "./quotes/eddie.txt",
+  "./quotes/soap.txt",
+  "./quotes/tom.txt",
+  "./quotes/rory_breaker.txt",
   "./audio/alarm-clock-01.mp3",
   "./audio/alarm-clock-01.ogg",
   "./images/android-chrome-192x192.png",

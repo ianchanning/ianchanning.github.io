@@ -18,16 +18,6 @@ const param = (key) => new URLSearchParams(window.location.search).get(key);
 
 const shouldPlaySound = () => !["true", "1", ""].includes(param("silent"));
 
-const fetchQuotes = async (fileName) => {
-  const response = await fetch(`quotes/${encodeURIComponent(fileName)}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch quotes: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.text();
-  return Hjson.parse(`[${data}]`);
-};
-
 if ("Notification" in window) {
   Notification.requestPermission().catch((error) => {
     console.warn("Notification permission was not granted:", error);
@@ -48,42 +38,30 @@ if ("serviceWorker" in navigator) {
 }
 
 /**
- * Play the alarm and log the quote. Elm decides when and who.
+ * Play the alarm and log the quote. Elm decides when, who and which quote.
  *
- * @param {{file: string, speaker: string}} detail
+ * @param {{quote: string, speaker: string}} detail
  */
-const randomNotification = ({ file, speaker }) => {
+const randomNotification = ({ quote, speaker }) => {
   if (shouldPlaySound()) {
     alarm.play();
   }
 
-  fetchQuotes(file)
-    .then((quotes) => {
-      const randomQuote = quoteChooser(quotes);
-      const notificationsElement = document.querySelector(".notifications");
-      if (notificationsElement) {
-        notificationsElement.insertAdjacentHTML(
-          "afterbegin",
-          formatQuote(randomQuote, speaker),
-        );
-      } else {
-        console.error('Element with class "notifications" not found.');
-      }
+  const notificationsElement = document.querySelector(".notifications");
+  if (notificationsElement) {
+    notificationsElement.insertAdjacentHTML("afterbegin", formatQuote(quote, speaker));
+  } else {
+    console.error('Element with class "notifications" not found.');
+  }
 
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          const notification = new Notification(`${speaker} says`, {
-            body: randomQuote,
-          });
-          window.setTimeout(() => notification.close(), 10000);
-        } catch (error) {
-          console.warn("Notification could not be displayed:", error);
-        }
-      }
-    })
-    .catch((error) => {
-      console.error("Failed to fetch quotes:", error);
-    });
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      const notification = new Notification(`${speaker} says`, { body: quote });
+      window.setTimeout(() => notification.close(), 10000);
+    } catch (error) {
+      console.warn("Notification could not be displayed:", error);
+    }
+  }
 };
 
 /**
@@ -99,11 +77,6 @@ const formatQuote = (quote, speaker) => {
   const formattedTime = new Date().toLocaleTimeString("en-US", timeOptions);
 
   return `<blockquote>&ldquo;${prettyQuote}&rdquo;<figcaption>&mdash; says ${speaker} <cite>@ ${formattedTime}</cite></figcaption></blockquote>`;
-};
-
-const quoteChooser = (quotes) => {
-  const randomNumber = Math.floor(Math.random() * quotes.length);
-  return quotes[randomNumber];
 };
 
 const checkToggle = () => (timer.classList.contains("ticking") ? stop : start);
