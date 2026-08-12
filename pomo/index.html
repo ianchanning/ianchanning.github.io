@@ -116,131 +116,89 @@
       }
     </style>
     <style type="text/css">
+      /* <details> is a block, but the "+" belongs on the buttons row. Inline
+         keeps it there; the blockquote inside is still a block, so the opened
+         reminder breaks the line and lands underneath where it always was. */
       .reminder {
+        display: inline;
+      }
+
+      .reminder > summary {
+        cursor: pointer;
+        display: inline;
+        font-family: ui-monospace, monospace;
+        list-style: none;
+      }
+
+      .reminder > summary::-webkit-details-marker {
         display: none;
+      }
+
+      .reminder > summary::after {
+        content: "+";
+      }
+
+      .reminder[open] > summary::after {
+        content: "\00D7";
       }
 
       #min,
       #sec,
       #pomo {
+        appearance: textfield;
+        border: 1px solid #767676;
+        border-radius: 2px;
+        display: inline-block;
+        font-size: 1rem;
+        line-height: 1.5;
+        padding: 0.5rem 1rem;
         width: 2ch;
+      }
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+
+      /* Elm emits no whitespace between elements, so the boxes would otherwise
+         touch. The old markup got this gap free from newlines in the HTML. */
+      .time .separator {
+        margin: 0 0.25rem;
       }
 
       figcaption {
         font-size: 80%;
         color: #999;
       }
-    </style>
-  </head>
-  <body class="light">
-    <h1>DO IT</h1>
-    <div id="chker" class="chker">
-      <ul class="tabs">
-        <li><a href="?says=0&silent=0">Bacon</a></li>
-        <li><a href="?says=1&silent=0">Eddie</a></li>
-        <li><a href="?says=2&silent=0">Soap</a></li>
-        <li><a href="?says=3&silent=0">Tom</a></li>
-        <li><a href="?says=4&silent=0">Rory</a></li>
-      </ul>
-      <form>
-        <fieldset>
-          <div class="clock">
-            <div class="time">
-              <input
-                id="min"
-                class="min"
-                type="text"
-                value="25"
-                title="25 minutes sitting on a wall, and if one of those minutes should accidentally fall"
-              />
-              <span class="separator">:</span>
-              <input
-                id="sec"
-                class="sec"
-                type="text"
-                value="00"
-                disabled
-                readonly
-                title="tick... tick... tick..."
-              />
-              <span class="separator">&nbsp;</span>
-              <input
-                id="pomo"
-                class="pomo"
-                type="text"
-                value="00"
-                disabled
-                readonly
-                title="I swear I did, like, 5 pomodoros in a row once"
-              />
-            </div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <div class="buttons">
-            <button
-              type="button"
-              class="start button gray"
-              title="RSI tip: Space bar works too"
-            >
-              Start
-            </button>
-            <button type="button" class="stop button gray" title="Hammertime">
-              Stop
-            </button>
-            <code>
-              <a href="javascript:void(0);" id="reminder" tabindex="-1">+</a>
-            </code>
-          </div>
-        </fieldset>
-      </form>
-    </div>
-    <blockquote class="reminder">
-      <p>
-        &ldquo;I know, lets build a pomodoro timer with quotes from Lock
-        Stock.&rdquo;
-        <figcaption>&mdash; says No-one ever</figcaption>
-      </p>
-      <p>
-        <a href="http://pomodorotechnique.com/get-started/">Reminder</a> to
-        self:
-      </p>
-      <h3>1. &ldquo;Choose a task you&rsquo;d like to get done&rdquo;</h3>
-      <p>
-        &ldquo;Pick the thing you&rsquo;ve been avoiding since the Jurassic
-        period. Doesn&rsquo;t matter if it&rsquo;s curing cancer or finally
-        Googling &lsquo;how to adult&rsquo;&mdash;just pick
-        <em>something</em> before your existential dread picks for you. Pro tip:
-        If your to-do list were a person, it&rsquo;d be haunting your nightmares
-        by now.&rdquo;
-      </p>
-      <h3>2. &ldquo;Set the pomodoro for 25 minutes&rdquo;</h3>
-      <p>
-        &ldquo;Set a timer for 25 minutes. Yes, <em>that</em> timer. The one
-        you&rsquo;ll stare at like a microwave countdown, bargaining with the
-        universe for a meteor strike to save you from replying to emails. This
-        isn&rsquo;t a &lsquo;small oath&rsquo;&mdash;it&rsquo;s a hostage
-        negotiation with your own attention span. Spoiler: You&rsquo;re both the
-        kidnapper <em>and</em> the negotiator.&rdquo;
-      </p>
-      <h3>3. &ldquo;Work on the task until the pomodoro rings&rdquo;</h3>
-      <p>
-        &ldquo;Hyperfocus for 25 minutes. Or, more accurately: Spend 15 minutes
-        working, 7 minutes wondering if you&rsquo;re allergic to productivity,
-        and 3 minutes writing down &lsquo;urgent&rsquo; distractions like
-        <em>&lsquo;Why do I own 3 staplers?&rsquo;</em> or
-        <em>&lsquo;Is my plant judging me?&rsquo;</em> Pro move: Burn the
-        distraction list afterward. Fire purifies all sins, including your
-        impulse to reorganize the fridge <em>mid-task</em>.&rdquo;
-      </p>
-    </blockquote>
-    <div class="notifications"></div>
-    <audio id="alarm">
-      <source src="audio/alarm-clock-01.mp3" type="audio/mpeg" />
-      <source src="audio/alarm-clock-01.ogg" type="audio/ogg" />
-    </audio>
 
-    <script type="text/javascript" src="js/hjson.min.js"></script>
-    <script type="module" src="js/main.js"></script>
-  </body>
+      .notifications blockquote {
+        quotes: "\201C" "\201D";
+      }
+
+      .notifications .quote::before {
+        content: open-quote;
+      }
+
+      .notifications .quote::after {
+        content: close-quote;
+      }
+    </style>
+    <script src="main.js" defer></script>
+    <script src="app.js" defer></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js", { scope: "./" })
+            .then((registration) => {
+              console.info("Pomodoro service worker registered:", registration.scope);
+            })
+            .catch((error) => {
+              console.error("Pomodoro service worker registration failed:", error);
+            });
+        });
+      }
+    </script>
+  </head>
+  <body></body>
 </html>

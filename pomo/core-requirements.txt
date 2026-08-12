@@ -1,0 +1,808 @@
+Lock Stock Pomodoros — Core Requirements & Type Design
+======================================================
+A working note before any Elm is written. The point is to choose the
+data model. Once the types are right the code writes itself; if the
+types are wrong no amount of clever code saves us.
+
+Status: thinking document. Nothing here is committed to yet.
+
+
+0. What the thing actually is
+-----------------------------
+Strip away the DOM and there are four facts:
+
+  - a countdown from 25 minutes to zero
+  - a count of how many times that has happened
+  - a cast member who says something when it does
+  - a running log of what has been said
+
+Everything else — the flashing title, the alarm, the desktop
+notification, the "+" disclosure — is decoration hung off those four.
+
+Anti-slop test for every type below: does it make an impossible state
+unrepresentable, or is it just ceremony? If it's ceremony, cut it.
+
+
+0b. What must survive the port
+------------------------------
+The four facts above are the mechanism. These are the reasons it
+exists, and a port that keeps the mechanism and loses these has
+failed:
+
+  - The reward swears its balls off. The quotes are the payoff. Not
+    a chime, not a checkmark, not a progress ring — Bacon telling you
+    you're up here shoplifting. Everything about the design should
+    serve the moment the quote lands.
+
+  - Fuck-you simplicity. One screen. No settings, no accounts, no
+    onboarding, no streaks, no analytics. The "+" is the only thing
+    that hides anything, and what it hides is a joke about staplers.
+
+  - The love of timers. chuck.js exists because timers are fun to
+    build, not because a countdown is hard. That instinct is the
+    project. The Elm version must be *more* fun to read, not merely
+    shorter — see §1b, where this pays off properly.
+
+  - Anti-slop: more time, less code. Every line deleted is the win.
+    If a section of this document takes an hour of argument to save
+    ten lines, that is the correct trade and the point of the whole
+    exercise.
+
+  - Paste ergonomics for quotes. See §4 — this is a real constraint I
+    initially got wrong, and it drives the whole quote pipeline.
+
+
+1. The chuck.js problem (read this first)
+-----------------------------------------
+js/chuck.js is the soul of the old app and it is also the single
+biggest thing we are deleting. It deserves a proper eulogy because
+understanding *why* it existed tells us what not to rebuild.
+
+chuck() is a chained ticker:
+
+    chuck().down(ss, 60).down(mm, 25).up(pp, 100, callback)
+
+Each link ticks one unit, and a private `_checkSum` accumulates
+`newValue - overflowValue` so that a larger unit only ticks when every
+smaller unit has just rolled over. It's genuinely elegant. It's also a
+carry operation — the same carry you do when you subtract 1 from 100
+on paper.
+
+Two things about it are pure 2013 web:
+
+  (a) It has no state of its own. `_hand()` reads the current value
+      back out of `unitElement.value` and `_print()` writes it back.
+      The DOM *is* the model. That is exactly the thing Elm exists to
+      abolish.
+
+  (b) The carry logic exists because minutes and seconds were three
+      separate independent counters that had to be kept in sync.
+
+In Elm both problems evaporate at once:
+
+    remaining : Int          -- seconds
+    tick m = { m | remaining = m.remaining - 1 }
+
+    display : Int -> ( Int, Int )
+    display total = ( total // 60, modBy 60 total )
+
+`//` and `modBy` are the checkSum. 200 lines become two. This is the
+headline result of the whole exercise and it should be the first
+commit.
+
+CAUTION — Chesterton's Fence. chuck.js has quirks that are visible in
+the screenshots. §1b works out which are features and which are bugs,
+using a tick-by-tick simulation rather than reading.
+
+
+1b. The off-by-one, properly examined
+-------------------------------------
+I ran chuck.js headless with fake elements and logged every tick
+(/tmp/chucksim — throwaway, but reproduce it before trusting me).
+Starting from the HTML defaults mm="25" ss="00" pp="00":
+
+    t=0     25:00  pomo=00    (at rest)
+    t=1     24:59  pomo=01    <-- reward fires HERE
+    t=2     24:58  pomo=01
+    ...
+    t=1499  00:01  pomo=01
+    t=1500  00:00  pomo=01
+    t=1501  24:59  pomo=02    <-- reward fires HERE
+    ...
+    t=3001  24:59  pomo=03
+
+    callback fired at ticks: [ 1, 1501, 3001 ]
+
+Two distinct bugs, and they are the same bug.
+
+  BUG 1 — the reward fires one second after you press Start.
+  Both screenshots corroborate this and I misread them first time
+  round. screenshot.png: 24:51 with a Rory quote already on screen.
+  mac-pwa-screenshot.png: 24:49, pomo=01, Bacon quote already there.
+  Nine seconds in, one pomodoro banked, quote delivered. Not a
+  rendering artefact — the machine really does pay out immediately.
+
+  This is why `randomNotification` opens with
+
+      if (parseInt(pp.value, 10) >= 1) stopTimer();
+
+  It is not a feature and it is not about the first pomodoro. It's a
+  guard bolted on to stop the spurious t=1 payout from also halting
+  the timer you just started. `pp.value` is still "00" at t=1 because
+  the callback runs before `_print`, so the guard passes and the timer
+  survives. A workaround for a bug, protected by a race. Delete both.
+
+  BUG 2 — the interval is 1501 seconds, not 1500.
+  Gaps between fires are 1500 (1→1501→3001), so steady-state period is
+  right, but the *first* one is one tick short and every subsequent
+  boundary displays 00:00 for a full second before paying out.
+
+  ROOT CAUSE (one line): `_downOverflow = limit => limit - 1`.
+
+  The minute counter's "I have just wrapped" sentinel is 24, because a
+  down-counter over 25 values occupies 0..24. But the HTML seeds it
+  with 25 — a value outside the counter's own domain. So on tick one
+  the minutes land exactly on the wrap sentinel, `_checkSum` reaches
+  zero, the carry propagates into the pomodoro counter and it ticks.
+
+  25:00 is not a state this machine can represent. It is a label
+  printed in the HTML that the machine immediately corrects. The
+  entire off-by-one family descends from that single fact.
+
+  This is also precisely the conflict described as "01->00 vs 00->59".
+  chuck fires on the *wrap* (00:00 -> 24:59), because a wrap is the
+  only event a carry-chain can detect. It cannot fire on 00:01 ->
+  00:00, because at that moment nothing has wrapped — seconds went
+  1 -> 0, no carry, no signal. The architecture can only see the
+  transition one tick too late. The chained-carry design forces the
+  bug; no amount of tuning `_downOverflow` fixes it, because a carry
+  chain fundamentally reports *after* the odometer rolls, and a
+  pomodoro completes *when it reaches* zero.
+
+  The old code's own @todo says this, twice, in different words:
+  "the down overflow for the primary number should be 'limit'" and
+  "at 00:01 you want to transition to 25:00". It knew. It couldn't get
+  there from where it was standing.
+
+  WHY THE UP AND DOWN COUNTERS FOUGHT.
+  Down-counters and up-counters disagree about where their sentinel
+  lives. Counting up, "just wrapped" means 0. Counting down, "just
+  wrapped" means limit-1. So `_setCheckSum` has to subtract a
+  different overflow per direction, and the chain only reads as zero
+  when *every* link happens to sit on its own sentinel simultaneously.
+  Chaining a down (seconds), a down (minutes) and an up (pomodoros)
+  means three sentinels — 59, 24, and 0 — must coincide. They do, at
+  the wrap. And, unavoidably, at t=1, because the seed 25 is a
+  sentinel in disguise.
+
+  THE UNISON WE ACTUALLY WANT (§1c).
+
+
+1b-ii. What the chuck library proves
+------------------------------------
+~/external-projects/chuck is the standalone library, and it settles the
+question — because it documents a contract that pomo breaks.
+
+Both examples carry the same HTML comment:
+
+    The initial values should be limit -1 for counting down
+    or 00 / 01 for counting up
+
+countdown.html obeys it literally:
+
+    initseconds = chuck().zeroPadLimit(countSeconds)(countSeconds - 1)
+
+Seeded at limit-1 ("09" for a 10-count). Simulated over 42 ticks:
+
+    liftoffs at ticks: 10, 20, 30, 40
+
+Perfect. No spurious fire at t=1, exact period. **Chuck is correct when
+used as documented.**
+
+Now the same simulation against pomo's chain, varying only the seed:
+
+    mm="25" (as shipped)   fires at 1, 1501, 3001
+    mm="24" (per contract) fires at 1441, 2941
+
+The contract-obeying seed has no t=1 payout. The bug is not in chuck.
+The bug is that pomo seeds `value="25"` in the HTML, because the app
+wants to display **25:00** at rest — and chuck's contract says a
+down-counter over 25 values must be seeded at 24.
+
+So the real finding, and it's sharper than §1b's:
+
+    You cannot display "25:00" and obey chuck's contract at the same
+    time. To show the number a human expects, you must lie to the
+    machine, and the lie costs you a spurious payout on tick one.
+
+That is a representation conflict baked into the design, not a typo.
+chuck stores state in the display, so the display cannot differ from
+the state — and here they genuinely need to differ, because 25:00 is
+the *boundary* of a 25-minute span, not a value within it. An odometer
+cannot show a number that isn't on the wheel.
+
+§1c dissolves it rather than fixing it. When display is a *function* of
+`elapsed` rather than the storage for it, `elapsed = 0` renders 25:00
+with `pomodoros = 0` and no lie is required anywhere. The conflict
+can't recur because there is only one number and it is never displayed
+directly.
+
+Two further notes from the library:
+
+  - THE FORK. pomo/js/chuck.js is not upstream. It adds INPUT support
+    (`_print` and `_hand` branch on `tagName`) so the digits could be
+    editable text boxes; upstream is `innerHTML`/`innerText` only, plus
+    pomo logs the buried callback error. Worth knowing: deleting
+    pomo's copy does not delete chuck. The library stands on its own,
+    with its own tests, README and examples, still doing exactly what
+    it was built for. We are not killing chuck — we are declining to
+    use a display-as-storage ticker in a language whose entire premise
+    is that the display is a function of the state. It keeps the
+    stopwatch and the countdown, which is where the chaining genuinely
+    earns its keep (see below).
+
+  - Q5 IS SETTLED. tests/chuck.test.js contains exactly three tests,
+    all zeroPad, and one of them is:
+
+        expect(chuck().zeroPadLimit(100)(1)).toBe("01");
+
+    Two digits for limit 100 is enshrined as expected behaviour, not
+    an accident. Keep the appearance, drop the log10. No ruling needed.
+
+  - WHERE CHAINING STILL WINS. The README's countdown-to-an-event
+    example chains four links — sec/min/hour/day, limits 60/60/24/365.
+    Under §1c that's still one number and a bigger divMod, so the
+    argument holds there too. But note that chuck's chain is *generic*
+    over the limits, whereas divMod hardcodes them at each call site.
+    For a fixed 25-minute pomodoro that genericity is unused weight.
+    If we ever wanted arbitrary unit chains in Elm, the honest
+    equivalent is a fold over a list of limits:
+
+        List.foldr (\limit (n, acc) -> (n // limit, modBy limit n :: acc))
+
+    which is chuck's whole idea in one line, pure, and without needing
+    the DOM to remember anything. Out of scope here — but it's the
+    proof that the *idea* survives the port even though this
+    implementation doesn't. Timing chaos, conserved.
+
+
+1c. One number, three views
+---------------------------
+The carry chain was emulating division. So do division.
+
+    elapsed : Int                       -- seconds since Start
+
+    pomodoros = elapsed // 1500
+    remaining = 1500 - modBy 1500 elapsed
+    minutes   = remaining // 60
+    seconds   = modBy 60 remaining
+
+The minute counter going down and the pomodoro counter going up are
+not two counters that must be kept in unison. They are the quotient
+and the remainder of one number. That IS the unison — it's `divMod`,
+and it cannot fall out of step because there is nothing to keep in
+step. `_checkSum` was a hand-rolled carry; `//` and `modBy` are the
+carry, correct by construction, in the standard library.
+
+Traced:
+
+    elapsed=0     -> 25:00  pomo=0
+    elapsed=1     -> 24:59  pomo=0
+    elapsed=1499  -> 00:01  pomo=0
+    elapsed=1500  -> 25:00  pomo=1     <-- reward fires HERE
+    elapsed=3000  -> 25:00  pomo=2
+
+The display is identical to chuck's for every second of the run. The
+familiar "24:59 one second after Start" is preserved — it was never
+the bug, it's just what a countdown looks like. What changes:
+
+    - no payout at t=1
+    - the period is 1500, not 1501
+    - 00:00 is never displayed; 00:01 flips straight to 25:00 with the
+      pomodoro count ticking, which is the transition the @todo asked
+      for and the one that reads correctly to a human
+    - the `if (pp.value >= 1) stopTimer()` guard has nothing to guard
+
+If we decide we *want* to see 00:00 land before it rolls, that's
+`1499 - modBy 1500 elapsed` and a fire at zero instead — a one-token
+change. I prefer never showing 00:00: reaching zero and the reward are
+the same event, and displaying zero for a second before paying out is
+the visual stutter at the exact moment that matters most (§0b).
+
+And the auto-restart survives for free. `elapsed` never resets, so the
+next pomodoro just carries on — the loop that made this feel like a
+work session rather than an egg timer, now a consequence of the model
+instead of an accident of wrap-around.
+
+This is also why deadline-based timing (§2) becomes almost free:
+
+    elapsed = (now - startedAt) // 1000
+
+One subtraction. The model is `startedAt`, everything else is a view
+function. A backgrounded PWA catches up exactly instead of silently
+losing four minutes, and no state can drift because there is no state
+to drift — the only stored number is a fixed point in the past.
+
+That is the whole timer. It is smaller than chuck's list of @todos.
+
+Remaining rulings on inherited quirks:
+
+  Q4. The editable minutes box. `#min` is a live text input, so the
+      user can retype it mid-run and chuck reads it back. A free
+      feature of DOM-as-state. Under §1c the equivalent is adjusting
+      `startedAt`, which is doable but no longer free. Keep, or fix at
+      25? (The Pomodoro Technique says 25. Fuck-you simplicity says
+      25.)
+
+      Note §1b-ii: the INPUT branch in `_print`/`_hand` is pomo's
+      local fork of chuck, added solely to make this work. Fixing at
+      25 retires the fork's entire reason for existing.
+
+  Q5. SETTLED by tests/chuck.test.js — `zeroPadLimit(100)(1) === "01"`
+      is an asserted expectation, not the off-by-one I took it for.
+      Keep two-digit padding, drop the log10.
+
+
+2. Modelling the timer
+----------------------
+Four candidates, worst to best.
+
+  A. Mirror the DOM.
+        { minutes : Int, seconds : Int, pomodoros : Int, ticking : Bool }
+     Rejected. 25:61 is representable. So is ticking with 0 minutes and
+     0 seconds. It's chuck.js with extra steps.
+
+  B. Single counter plus a flag.
+        { remaining : Int, pomodoros : Int, ticking : Bool }
+     Honest and small. Minutes/seconds become a view concern, which is
+     correct — they are a *rendering* of a duration, not a fact about
+     the world. Weakness: `ticking` is a Bool, and Bools in a model are
+     usually a custom type that hasn't been born yet.
+
+  C. Counter plus a phase type.
+        type Phase = Idle | Running | Paused
+        { remaining : Int, pomodoros : Int, phase : Phase }
+     Better naming, same shape. But is Idle really distinct from
+     Paused-at-full? Only if we want different button labels. Don't
+     invent Paused until something needs it (Present Value Only).
+
+  D. Put the counter inside the state.
+        type Timer
+            = Idle                 -- fresh, 25:00 on the clock
+            | Running Int          -- seconds left
+        { timer : Timer, pomodoros : Int, ... }
+     This is the Elm answer. `remaining` only exists when it means
+     something. You cannot ask "how many seconds left" of a stopped
+     timer, because that question has no answer, and the compiler
+     enforces it. Subscriptions fall out for free:
+
+        subscriptions model =
+            case model.timer of
+                Idle -> Sub.none
+                Running _ -> Time.every 1000 Tick
+
+     That single `case` replaces `timerId === 0` guards, the
+     `if (timerId === 0)` spam-prevention, and `clearInterval`. No
+     runaway intervals are possible because there is no interval to
+     leak. This is the argument for Elm in one screenful.
+
+  Leaning: D.
+
+  Open question — drift. `Time.every 1000` is not a clock, it's a
+  heartbeat, and it drifts (and gets throttled hard in background
+  tabs, which for a 25-minute timer in a PWA is not academic). The
+  alternative is to store a deadline:
+
+        Running { endsAt : Time.Posix }
+
+  and derive `remaining` from `Time.now` on each tick. Then the tick
+  rate becomes a rendering choice, not a source of truth, and a
+  backgrounded tab catches up instantly instead of silently losing
+  four minutes.
+
+  Cost: needs `Time.Posix` plumbing at start (a `Task.perform` on
+  Time.now), and pausing means storing residual seconds rather than a
+  deadline, which pushes us back toward a slightly bigger type. Given
+  the old app has no pause, and given the PWA screenshot means this
+  runs in a real standalone window that WILL get backgrounded, I think
+  deadline-based is worth the cost. It is the one place where more
+  types buys real correctness rather than tidiness.
+
+  Decide: heartbeat (simple, drifts, dies in background) vs deadline
+  (correct, needs Time). I'd take deadline.
+
+
+3. Modelling the cast
+---------------------
+Currently a `List String` of filenames, indexed by a `?says=N` query
+param, with a runtime `files.includes()` guard because a String can be
+anything.
+
+    type Speaker = Bacon | Eddie | Soap | Tom | Rory
+
+Then:
+    - the tab bar is `List.map tab allSpeakers` — no hand-written <li>s
+    - `?says=7` becomes `Nothing` at the parse boundary and we fall
+      back to random; there is no "invalid quote file" error path
+      because there is no invalid quote file
+    - `quoter()` — the `ucwords(replace(/_/g, " "))` filename-mangling
+      that turns "rory_breaker.txt" into "Rory Breaker" — deletes
+      entirely. Display name becomes a function, not string surgery.
+
+This is the highest ratio of deleted-cleverness to added-clarity in
+the codebase. Note the display asymmetry to preserve: the tab says
+"Rory", the attribution says "Rory Breaker". Two functions, `tabName`
+and `saysName`, or one record. Two functions.
+
+Note also the unused cast in quotes/: bacon2, bill, lockstock. Out of
+scope, but a `Speaker` type makes adding them a one-line change with
+the compiler listing every site that needs updating. That's the sales
+pitch for exhaustive matching, and worth demonstrating once.
+
+
+4. Getting the quotes in
+------------------------
+CORRECTION. My first pass called hjson "a workaround for not having a
+parser" and moved on. That was wrong and it's worth saying why,
+because the real requirement is a design constraint on everything
+below.
+
+hjson is there for *paste ergonomics*. The workflow is: find a scene
+on IMDB, select, copy, paste a shit-ton of lines into bacon.txt, save.
+No quoting, no escaping, no commas, no trailing-comma trap, no
+worrying that Bacon says `"Too late, too late"` mid-sentence (he does
+— bacon.txt line 12) or that half the cast can't get through a
+sentence without an apostrophe. `Hjson.parse("[" + data + "]")` takes
+unquoted, unescaped, one-per-line text and hands back an array.
+
+That is a genuine feature and it protects the thing that makes the app
+worth having (§0b: the reward swears its balls off, and more swearing
+is always better). Any design that makes adding quotes harder than
+paste-and-save is a regression, however clean it looks.
+
+So the constraint is: **quotes/*.txt stays exactly as it is — one
+quote per line, zero escaping, zero syntax.** The question is only
+what reads it.
+
+  A. Keep hjson. Needs a port to call it, keeps an 11-line minified
+     dep, keeps the `"[" + data + "]"` wrapping hack. Rejected — but
+     for the right reason now: not because the format is bad, because
+     the *format doesn't need it*.
+
+  B. elm/http + String.lines.
+
+        Http.get { url = "quotes/bacon.txt", expect = Http.expectString .. }
+            |> ...
+        String.lines >> List.filter (not << String.isEmpty)
+
+     `String.lines` is the parser hjson was standing in for. One
+     quote per line IS a format, and Elm parses it in one function
+     from elm/core. hjson dies without the .txt files changing by a
+     single byte, and paste-and-save-and-reload still works with no
+     build step. Strictly better than A on every axis.
+
+     Costs: a `Result Http.Error` branch, and a network round-trip at
+     the exact moment of reward. Mitigations: prefetch at init (we
+     know the speaker up front, and we have 25 minutes of warning) and
+     the service worker must cache quotes/ anyway for offline.
+
+  C. Bake them in — generate src/Quotes.elm from quotes/*.txt.
+     No HTTP, no error state, no loading state, offline by
+     construction. The generator does the escaping, so paste
+     ergonomics survive at the source and Elm's string-literal rules
+     never leak out to whoever is pasting.
+
+     Cost: `npm run build` between paste and see. Small, but it turns
+     a 5-second loop into a 20-second one, and this is a project you
+     poke at for fun.
+
+  D. Flags — embed as JSON in index.html at init. Needs a decoder AND
+     a build step. Worst of both. No.
+
+  REVISED LEANING: B.
+
+  My first draft said C, on the grounds that the quotes have been
+  stable for a decade. That was reasoning from the artefact instead of
+  from the intent — the quotes are stable partly *because* nothing has
+  encouraged adding to them, and there are three unused files
+  (bacon2, bill, lockstock, 26KB of unmined lockstock.txt) sitting
+  there suggesting the appetite exists. Optimise for the paste.
+
+  B also keeps the app honestly offline-first via the service worker
+  rather than by dodging the network, which is a better PWA story and
+  exercises the one thing sw.js is for.
+
+  Either way: hjson.min.js is deleted, and `String.lines` is the
+  entire replacement.
+
+  Non-empty. `List.head` on a fetched list gives a `Maybe` and we'd
+  have to invent a fallback quote (which, tempting as it is to make it
+  "Bit of a mouthful, that" — resist). Better:
+
+      case quotes of
+          first :: rest -> Random.uniform first rest
+          [] -> ...
+
+  `Random.uniform : a -> List a -> Generator a` wants exactly a
+  non-empty pair, so the shape of the cons-cell match and the shape of
+  the generator agree perfectly. The `[]` branch only exists at the
+  HTTP boundary where it genuinely might happen (empty file), and
+  there the honest answer is "don't fire a reward", not a fallback.
+
+  A `type Quote = Quote String` newtype buys nothing — quotes are used
+  in one place and confused with nothing. Resist.
+
+
+5. Randomness
+-------------
+`Math.random()` is scattered through main.js in two places (which
+speaker, which quote). In Elm randomness is a Cmd, which forces both
+into one place:
+
+    Random.generate GotQuote (Random.uniform first rest)
+
+The speaker choice happens once at init if `?says` is absent; the
+quote choice happens per completed pomodoro. Both are `Random.generate`.
+No Random.Seed in the model — we don't need reproducibility, and
+carrying a seed is exactly the kind of ceremony to avoid.
+
+
+6. The notification log
+-----------------------
+main.js does `insertAdjacentHTML("afterbegin", ...)` into
+`.notifications`. Newest first, unbounded, and built by string
+concatenation with a manual `'` → `&rsquo;` replace.
+
+    type alias Note =
+        { quote : String
+        , speaker : Speaker
+        , at : Time.Posix
+        }
+
+    notes : List Note      -- newest first, `note :: notes`
+
+The `&rsquo;` hand-mangling and the `&ldquo;`/`&rdquo;` wrapping are
+XSS-adjacent string surgery that Elm's Html makes unnecessary — text
+is text, and typography belongs in CSS (`quotes:` + `::before`) or in
+the source strings themselves. Prefer fixing the apostrophes in the
+source .txt files once, at generation time, over doing it on every
+render forever.
+
+Time formatting (`toLocaleTimeString("en-US", { hour12: true })` →
+"5:00 PM") needs `Time.Zone`, which needs `Time.here` at init. That's
+the one genuine tax Elm charges here. Worth it: the current code
+creates `new Date()` at *render* time rather than at *event* time, so
+a re-render would relabel old quotes. Ours can't, because the Posix is
+captured in the Note. Small correctness win, free.
+
+Bound the list? The old one grows forever. Nobody has hit a problem.
+Leave it unbounded; note it here so we know it was a choice.
+
+
+7. The edges — what stays JavaScript
+------------------------------------
+Elm can't do these, so they become ports. Keep the list brutally short
+and copy pingolin's port style rather than inventing one:
+
+  - Notification API (permission + fire)      -> port notify : ...
+  - <audio>.play() for the alarm              -> port or Html attribute
+  - document.title                            -> Browser.Document, no port
+  - service worker registration               -> stays in index.html, untouched
+  - URL query params (?says, ?silent)         -> flags at init, not a port
+
+Notes on each:
+
+  document.title. The old `updateTitle()` walks `.time`'s childNodes,
+  filters out <a> tags, and joins the values — DOM scraping to
+  reconstruct a string it already had. With Browser.document the title
+  is just a field of what `view` returns. Pure deletion.
+
+  The alarm. Two routes. A port calling `.play()` is explicit and
+  matches how a real notification works. Alternatively, render the
+  <audio> only when firing and let autoplay do it — cute, but fights
+  browser autoplay policy and is a rendering side-effect, which is a
+  lie about what `view` is for. Take the port.
+
+  Query params. `?says` and `?silent` are read once at load and never
+  change (each tab link is a full page navigation). So: flags, not
+  Browser.application. Browser.application brings a Url parser, a Key,
+  and link interception for a page that has no routes. That is the
+  single most likely place to over-engineer this. Browser.document
+  plus two flags.
+
+  ...unless we want the tabs to switch speaker without reloading, in
+  which case the tab bar becomes a Msg and the URL becomes cosmetic
+  (a `pushUrl` port, as pingolin does with `updateUrl`). That is
+  strictly nicer UX — instant, no white flash, timer keeps running
+  across a speaker change, which the current app cannot do. Worth
+  wanting. It does not require Browser.application; a one-way
+  `updateUrl` port is enough.
+
+  Ruling needed: do tabs reload (today's behaviour, zero work) or
+  switch live (better, ~10 lines, and it means changing speaker
+  mid-pomodoro no longer resets your timer — which is a real bug fix
+  disguised as a feature).
+
+  `?silent`. Current check is `!["true","1",""].includes(param)`,
+  so `?silent=0` means loud and a bare `?silent` means loud too —
+  which reads backwards and is why every tab link carries `silent=0`.
+  Model it as `Bool` decoded once, and pick one obvious convention.
+
+
+8. Keyboard
+-----------
+Space toggles start/stop, with a keydown/keyup pair used to fake a
+button press-and-release animation, plus `.click()`, `.focus()` and a
+class toggle. Three mechanisms for one interaction.
+
+In Elm: `Browser.Events.onKeyDown` decoding the key, producing the same
+`Toggle` Msg the button produces. The press animation is `:active` in
+CSS, which is what CSS is for. `preventDefault` on space (to stop page
+scroll) needs `Html.Events.custom` or a document-level decoder —
+the one fiddly bit; check the Elm guide's keyboard section rather than
+guessing.
+
+Delete `checkToggle()`'s DOM-class interrogation entirely. Whether we
+are running is `model.timer`, not `classList.contains("ticking")`.
+
+
+9. The "+" disclosure
+---------------------
+`reminderLink.textContent === "+"` — the app asks the DOM what state it
+is in by reading a character out of a link's text. Peak 2013.
+
+Two options:
+  - `showReminder : Bool` in the model plus a Msg. Explicit, 3 lines.
+  - `<details>/<summary>`. Zero model, zero Msg, zero JS, keyboard
+    accessible for free, and it's semantically exactly what this is.
+
+Take `<details>`. Not everything needs to be in the model, and the best
+Elm code knows when the platform already solved it. The only loss is
+the "+"/"×" glyph swap, which is a `summary::marker` or a rotated
+chevron in CSS.
+
+
+10. UI / UX — brutalist but cared-for
+-------------------------------------
+The mofoforms.html lineage is the right one: no classes, no framework,
+~50 lines of CSS, system font, one max-width, everything else default
+browser chrome. The current index.html has already drifted toward that.
+Hold the line.
+
+Things I'd change, all small, none of them "redesign":
+
+  - The three number boxes are `<input>` because chuck needed somewhere
+    to store state. Two of them are `disabled readonly` — a text input
+    that cannot be typed in is a lie to the user and to assistive tech.
+    If minutes stays editable, it stays an input; seconds and pomodoro
+    count become `<output>` or plain text. This is the visual
+    signature of the app so the *look* (boxed digits) must survive the
+    change — that's a CSS border on a span, not an input element.
+
+  - The clock should be `aria-live="off"` and the notification area
+    `aria-live="polite"`. A screen reader announcing every second is
+    torture; announcing the quote at the end is the whole point.
+
+  - `title` attributes carry the jokes ("Hammertime", "tick... tick...
+    tick..."). Keep every one of them. They are the personality of the
+    app and they cost nothing.
+
+  - The two screenshots differ: the older one has "+" after the digits,
+    the newer has it after the Stop button. The newer placement is
+    better (the "+" is an app-level action, not a clock digit). Keep
+    the new one.
+
+  - `1 minute` and `01 pomodoro` both render as "01" in adjacent boxes
+    with no label between them (screenshot: "24 : 49  01"). A visitor
+    cannot tell what the third box is. The `title` says "I swear I did,
+    like, 5 pomodoros in a row once". A tomato glyph, or a count of
+    tomato glyphs instead of a number, would say it without a word of
+    UI copy and would suit the brutalism. Optional; flagging it because
+    it's the one genuine legibility gap.
+
+  - Focus states. `outline: none` anywhere is a bug. Currently a recent
+    commit removed border styles from form elements — check we didn't
+    take the focus ring with it.
+
+
+11. Proposed shape (for argument, not for typing in)
+----------------------------------------------------
+    type Timer
+        = Idle
+        | Running Time.Posix        -- startedAt (§1c)
+
+    type Speaker
+        = Bacon | Eddie | Soap | Tom | Rory
+
+    type alias Note =
+        { quote : String, speaker : Speaker, at : Time.Posix }
+
+    type alias Model =
+        { timer : Timer
+        , now : Time.Posix
+        , speaker : Speaker
+        , quotes : List String
+        , notes : List Note
+        , silent : Bool
+        , zone : Time.Zone
+        }
+
+    type Msg
+        = Start
+        | Stop
+        | Tick Time.Posix
+        | GotQuotes (Result Http.Error String)
+        | GotQuote String
+        | GotZone Time.Zone
+        | ChangeSpeaker Speaker      -- only if tabs go live (§7)
+
+Note what is NOT in the model: no `remaining`, no `minutes`, no
+`seconds`, no `pomodoros`, no `ticking`. Those are all view functions
+of `now - startedAt` (§1c). Storing any of them reintroduces the
+possibility of them disagreeing — which is precisely the class of bug
+chuck.js spent 200 lines and four @todos failing to prevent.
+
+Detecting completion is then `pomodoros` changing between renders,
+which is derived, not stored... and derived values can't trigger
+effects. So `update` compares the pomodoro count before and after each
+Tick and fires the reward on change. That comparison is the *only*
+imperative thing left in the app, it is three lines, and it fires on
+`00:01 -> 25:00` — the transition chuck could never reach.
+
+Seven fields, seven messages, three types. Against 537 lines of JS.
+
+If it grows past this, something has gone wrong and we should come
+back to this file rather than push on.
+
+
+12. Sequencing
+--------------
+Small steps, each one a working app, each one committable. No big bang.
+
+  1. elm.json + a Main.elm that renders the static markup and nothing
+     else. Prove the toolchain (see pingolin's package.json for the
+     `elm make --output=` pattern; do not invent a bundler).
+  2. Timer: Idle/Running, start/stop, `now - startedAt`, divMod views,
+     title updating. Delete chuck.js. This is the moment of truth, and
+     it is also the bug fix — §1b's t=1 payout and 1501-second period
+     both disappear without being fixed, because §1c cannot express
+     them.
+  3. Speaker type + tab bar + ?says flag.
+  4. Http + String.lines + Random. Delete hjson.min.js.
+  5. Notes list + time formatting.
+  6. Ports: notification, alarm.
+  7. Keyboard, <details>, CSS pass.
+  8. sw.js cache list (must include quotes/*.txt — see §4B), delete
+     js/ entirely.
+
+Step 2 is where the argument is won or lost. Everything after it is
+bookkeeping.
+
+Before step 2 lands, port /tmp/chucksim's tick log into a proper
+comparison: run the Elm `displayAt : Int -> String` over 0..3010 and
+diff it against the chuck trace. Every second should match except the
+ones §1b calls bugs. That diff IS the proof, and it's the only test
+this project needs.
+
+
+13. Rulings needed from the Carbon Pirate
+-----------------------------------------
+  §1b  the t=1 payout and the 1501-second period: confirmed bugs,
+       fixed for free by §1c. Assuming yes unless you loved them.
+  §1c  never display 00:00 (I say never — it's the reward moment,
+       no stutter), or land on zero for a second first?
+  Q4   editable minutes: keep, or fix at 25? (Fixing at 25 retires
+       pomo's fork of chuck entirely — see §1b-ii.)
+  §4   fetch + String.lines (revised leaning) vs bake in. Turns on how
+       often you actually want to paste new quotes.
+  §7   tabs reload vs switch live (I say live — today, changing
+       speaker mid-pomodoro silently kills your timer)
+  §10  tomato glyphs for the pomodoro count, or leave the third box?
+
+  SETTLED, no ruling needed:
+  Q5   two-digit padding is asserted in chuck's own test suite (§1b-ii)
+  §1b-ii  the off-by-one is pomo breaking chuck's documented
+       limit-1 seeding contract, not a chuck defect
+
+Everything else I'll take the leaning stated above unless told
+otherwise.

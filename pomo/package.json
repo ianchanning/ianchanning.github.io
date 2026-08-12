@@ -1,0 +1,13 @@
+{
+  "name": "lock-stock-pomodoros",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "elm make src/Main.elm --output=main.js --optimize",
+    "dev": "elm make src/Main.elm --output=main.js"
+  },
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "elm": "0.19.2-0"
+  }
+}
