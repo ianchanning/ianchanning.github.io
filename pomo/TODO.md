@@ -828,8 +828,16 @@ entirely.
 ### Also closed here
 
 - **§10 tomato glyphs: declined.** "The UI is brutally simple, minimal slop so
-  maximally relying on what is in raw HTML." The third box stays a box. That
-  was the last open item of taste in this file.
+  maximally relying on what is in raw HTML." To be exact, because the wording
+  invites a misread: this was only ever the proposal to *replace the count's
+  digits* with 🍅 characters. **All three boxes stay**, and the third one goes
+  on showing a two-digit number. That was the last open item of taste in this
+  file.
+- **The original is the source of truth.** Ruled in conversation: "the
+  functionality, UX and UI of the original is the source truth unless it's
+  buggered in some way." Which is what settles §11 above — the original kept
+  its pomodoro count across a Stop, so the port does too, whatever that costs
+  the field count. Every deviation from here on wants a bug to point at.
 
 ---
 
@@ -863,16 +871,32 @@ silence, as §11 asks.
 
 Defaults above hold unless overruled — none of these block a start.
 
+**The standing one, which decides most of the others:** the original app's
+functionality, UX and UI are the source of truth, unless the original was
+buggered. Deviating wants a bug to point at, not a preference.
+
 - §1c — never show `00:00`? (assumed yes) — **shipped as assumed**
-- Q4 — minutes fixed at 25? **Ruled at Step 9: no, the box is editable.**
-  It sets the period, and it cost §11's seven-field model — see Step 9.
+- Q4 — minutes fixed at 25? **Ruled at Step 9: no, the box is editable**, as
+  it was in the original. It sets the period, and it cost §11's seven-field
+  model — see Step 9.
 - §4 — fetch vs bake in? (assumed fetch) — **shipped as fetch**
 - §7 — tabs live? (assumed yes) — **shipped live**
-- §10 — tomato glyphs for the pomodoro count? **Declined at Step 9.** The UI
-  stays brutally simple; the third box stays a box.
+- §10 — tomato glyphs for the pomodoro count? **Declined at Step 9.** Read it
+  narrowly: no 🍅 characters in place of the digits. **The box itself stays**,
+  as do all three, exactly as the original had them — `#min` editable, `#sec`
+  and `#pomo` read-only.
+- §11 — the model outgrew seven fields at Step 9, and the standing ruling is
+  why it stays that way: the original carried its pomodoro count through a
+  Stop, so the port must, and a derived count cannot (Step 9's deviations).
+  **Settled.**
 - §8 — the space bar's `preventDefault` lives in `app.js`, because
   `Browser.Events` listeners are passive and Elm is not permitted to cancel
   it. **Wants a ruling; it is a two-line revert** (see Step 7's deviations).
   Step 9 narrowed it so it leaves the minutes box alone.
+- §10 — `#sec` and `#pomo` are `<output>`, where the original had
+  `<input disabled readonly>`. Same box, same border, same width; `<output>`
+  is the read-only element and does not tell a screen reader it is a
+  disabled text field. **The one place the port does not match the original
+  tag-for-tag, and it is there because §10 asked for it.** Two-line revert.
 - The apostrophe fix lives in `lines`, not the source `.txt` files (Step 5).
   Ruled "thats fine" in conversation, recorded here so it is not re-litigated.
