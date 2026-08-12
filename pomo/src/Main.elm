@@ -2,9 +2,9 @@ port module Main exposing (Clock, clock, clockTime, main, pad)
 
 import Browser
 import Browser.Events
-import Html exposing (Html, a, audio, blockquote, button, cite, details, div, em, fieldset, figcaption, form, h1, h3, li, output, p, source, span, summary, text, ul)
-import Html.Attributes exposing (attribute, class, classList, href, id, src, title, type_)
-import Html.Events exposing (onClick, preventDefaultOn)
+import Html exposing (Html, a, audio, blockquote, button, cite, details, div, em, fieldset, figcaption, h1, h3, input, li, output, p, source, span, summary, text, ul)
+import Html.Attributes exposing (attribute, class, classList, href, id, src, title, type_, value)
+import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Http
 import Json.Decode as Decode
 import Random
@@ -33,6 +33,9 @@ port play : () -> Cmd msg
 port updateUrl : Int -> Cmd msg
 
 
+{-| The dial's starting position, not a law. The Pomodoro Technique says 25;
+the box says whatever you last typed into it (Q4).
+-}
 pomodoro : Int
 pomodoro =
     25 * 60
@@ -43,9 +46,14 @@ siteTitle =
     "Lock Stock Pomodoros : ianchanning"
 
 
+{-| `Paused` carries the seconds already served, which is the whole of what
+Stop has to remember. §2 said not to invent it until something needed it;
+Stop needing to mean *stop* rather than *reset* is that something.
+-}
 type Timer
     = Idle
     | Running Time.Posix
+    | Paused Int
 
 
 type Speaker
@@ -69,8 +77,17 @@ type alias Note =
     }
 
 
+{-| `period` and `pomodoros` are both here for the same reason: once the dial
+is user-adjustable, `elapsed // period` stops being the count of pomodoros you
+did and becomes a function of where the dial happens to be pointing now. Work
+already banked is a fact about your afternoon, not a rendering of the current
+cycle, so it is stored rather than derived (§1c's one subtraction still runs
+the clock; it just no longer runs the scoreboard).
+-}
 type alias Model =
     { timer : Timer
+    , period : Int
+    , pomodoros : Int
     , now : Time.Posix
     , speaker : Speaker
     , quotes : List String
@@ -85,6 +102,7 @@ type Msg
     | Started Time.Posix
     | Stop
     | Toggle
+    | SetMinutes String
     | Tick Time.Posix
     | ChangeSpeaker Speaker
     | ChoseSpeaker Speaker
@@ -110,6 +128,8 @@ init flags =
             flags.says |> Maybe.andThen String.toInt |> Maybe.andThen speakerAt
     in
     ( { timer = Idle
+      , period = pomodoro
+      , pomodoros = 0
       , now = Time.millisToPosix 0
       , speaker = Maybe.withDefault Bacon asked
       , quotes = []
@@ -135,39 +155,103 @@ update msg model =
     case msg of
         Start ->
             case model.timer of
-                Idle ->
-                    ( model, Task.perform Started Time.now )
-
                 Running _ ->
                     ( model, Cmd.none )
 
+                -- Idle is Paused 0 with better manners, so both resume the
+                -- same way: `Started` subtracts whatever has already been
+                -- served back off the clock.
+                _ ->
+                    ( model, Task.perform Started Time.now )
+
         Started now ->
-            ( { model | timer = Running now, now = now }, Cmd.none )
+            ( { model
+                | timer = Running (shift now (negate (elapsed model)))
+                , now = now
+              }
+            , Cmd.none
+            )
 
         Stop ->
-            ( { model | timer = Idle }, Cmd.none )
+            case model.timer of
+                Running _ ->
+                    ( { model | timer = Paused (elapsed model) }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         -- The space bar asks a question the model can already answer, so it
         -- routes back into the two branches the buttons use rather than
         -- growing a third copy of them (§8).
         Toggle ->
             case model.timer of
-                Idle ->
-                    update Start model
-
                 Running _ ->
                     update Stop model
+
+                _ ->
+                    update Start model
+
+        -- Turning the dial restarts the cycle it is measuring, exactly like
+        -- turning one on a physical timer. It cannot retroactively re-grade
+        -- pomodoros you have already banked, because it no longer computes
+        -- them. Typing the number the box already shows is not turning it —
+        -- that guard is what makes a stray keystroke harmless — and an
+        -- unparseable box (mid-edit, or empty) changes nothing at all.
+        SetMinutes typed ->
+            case String.toInt (String.trim typed) of
+                Just minutes ->
+                    let
+                        wanted =
+                            clamp 1 99 minutes
+                    in
+                    if wanted == (clock model.period (elapsed model)).minutes then
+                        ( model, Cmd.none )
+
+                    else
+                        ( { model
+                            | period = wanted * 60
+                            , timer =
+                                case model.timer of
+                                    Running _ ->
+                                        Running model.now
+
+                                    Paused _ ->
+                                        Paused 0
+
+                                    Idle ->
+                                        Idle
+                          }
+                        , Cmd.none
+                        )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         Tick now ->
             let
                 ticked =
                     { model | now = now }
+
+                -- Plural on purpose: a backgrounded PWA comes back owing
+                -- several, and the arithmetic pays all of them.
+                cycles =
+                    elapsed ticked // model.period
             in
-            ( ticked
-            , if banked ticked > banked model then
-                -- The pomodoro is what earns the noise. The quote is a separate
-                -- errand and may not arrive, but the alarm still should.
-                Cmd.batch
+            if cycles > 0 then
+                ( { ticked
+                    | pomodoros = model.pomodoros + cycles
+                    , timer =
+                        case ticked.timer of
+                            Running startedAt ->
+                                Running (shift startedAt (cycles * model.period))
+
+                            other ->
+                                other
+                  }
+                  -- The pomodoro is what earns the noise. The quote is a
+                  -- separate errand and may not arrive, but the alarm still
+                  -- should.
+                , Cmd.batch
                     [ if model.silent then
                         Cmd.none
 
@@ -175,10 +259,10 @@ update msg model =
                         play ()
                     , pick model.quotes
                     ]
+                )
 
-              else
-                Cmd.none
-            )
+            else
+                ( ticked, Cmd.none )
 
         ChangeSpeaker speaker ->
             ( { model | speaker = speaker, quotes = [] }
@@ -214,11 +298,11 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ case model.timer of
-            Idle ->
-                Sub.none
-
             Running _ ->
                 Time.every 1000 Tick
+
+            _ ->
+                Sub.none
         , Browser.Events.onKeyDown spaceBar
         ]
 
@@ -226,6 +310,9 @@ subscriptions model =
 {-| A decoder that fails is a key we did not want, and `Browser.Events` sends
 nothing when it fails. No `NoOp`, no keycode table, and nothing anywhere asks
 the DOM what state the timer is in (§8).
+
+The one thing it does ask the DOM is what you were typing into, because a
+space bar inside the minutes box is a space bar and not a verb.
 
 The matching `preventDefault` lives in `app.js`: `Browser.Events` registers its
 listeners `{ passive: true }` (elm/browser `Elm/Kernel/Browser.js:228`), so Elm
@@ -235,10 +322,12 @@ decided in exactly one place, which is this function.
 -}
 spaceBar : Decode.Decoder Msg
 spaceBar =
-    Decode.field "key" Decode.string
+    Decode.map2 Tuple.pair
+        (Decode.field "key" Decode.string)
+        (Decode.at [ "target", "tagName" ] Decode.string)
         |> Decode.andThen
-            (\key ->
-                if key == " " then
+            (\( key, tag ) ->
+                if key == " " && tag /= "INPUT" then
                     Decode.succeed Toggle
 
                 else
@@ -250,7 +339,7 @@ spaceBar =
 -- THE TIMER (§1c)
 
 
-{-| One number. Everything on screen is a view of it.
+{-| One number. Everything on the clock is a view of it.
 -}
 elapsed : Model -> Int
 elapsed model =
@@ -261,32 +350,39 @@ elapsed model =
         Running startedAt ->
             (Time.posixToMillis model.now - Time.posixToMillis startedAt) // 1000
 
+        Paused secondsServed ->
+            secondsServed
+
+
+{-| Move a fixed point in the past by some seconds. Starting is a shift
+backwards by what you have already served; banking is a shift forwards by what
+you just earned.
+-}
+shift : Time.Posix -> Int -> Time.Posix
+shift at seconds =
+    Time.millisToPosix (Time.posixToMillis at + seconds * 1000)
+
 
 type alias Clock =
     { minutes : Int
     , seconds : Int
-    , pomodoros : Int
     }
 
 
 {-| The quotient and the remainder of one number, which is why they cannot fall
 out of step. `//` and `modBy` are chuck's `_checkSum`, correct by construction.
+`period` is guarded to at least a minute at the point of typing, so `modBy`
+cannot be handed a zero.
 -}
-clock : Int -> Clock
-clock secondsElapsed =
+clock : Int -> Int -> Clock
+clock period secondsElapsed =
     let
         left =
-            pomodoro - modBy pomodoro secondsElapsed
+            period - modBy period secondsElapsed
     in
     { minutes = left // 60
     , seconds = modBy 60 left
-    , pomodoros = secondsElapsed // pomodoro
     }
-
-
-banked : Model -> Int
-banked model =
-    (clock (elapsed model)).pomodoros
 
 
 pad : Int -> String
@@ -508,14 +604,14 @@ view : Model -> Browser.Document Msg
 view model =
     let
         now =
-            clock (elapsed model)
+            clock model.period (elapsed model)
     in
     { title = documentTitle model now
     , body =
         [ h1 [] [ text "DO IT" ]
         , div [ id "chker", class "chker" ]
             [ tabs model.speaker
-            , timer now
+            , timer now model.pomodoros
             ]
         , div
             [ class "notifications"
@@ -533,8 +629,8 @@ documentTitle model now =
         Idle ->
             siteTitle
 
-        Running _ ->
-            pad now.minutes ++ " : " ++ pad now.seconds ++ " " ++ pad now.pomodoros ++ " - " ++ siteTitle
+        _ ->
+            pad now.minutes ++ " : " ++ pad now.seconds ++ " " ++ pad model.pomodoros ++ " - " ++ siteTitle
 
 
 tabs : Speaker -> Html Msg
@@ -557,17 +653,17 @@ tab current speaker =
         ]
 
 
-timer : Clock -> Html Msg
-timer now =
-    form []
+timer : Clock -> Int -> Html Msg
+timer now pomodoros =
+    div []
         [ fieldset []
             [ div [ class "clock" ]
                 [ div [ class "time" ]
-                    [ digits "min" "25 minutes sitting on a wall, and if one of those minutes should accidentally fall" now.minutes
+                    [ dial now.minutes
                     , span [ class "separator" ] [ text ":" ]
                     , digits "sec" "tick... tick... tick..." now.seconds
                     , span [ class "separator" ] [ text "\u{00A0}" ]
-                    , digits "pomo" "I swear I did, like, 5 pomodoros in a row once" now.pomodoros
+                    , digits "pomo" "I swear I did, like, 5 pomodoros in a row once" pomodoros
                     ]
                 ]
             ]
@@ -593,11 +689,29 @@ timer now =
         ]
 
 
-{-| `<output>` is "the result of a calculation", which is what all three of
-these are — nothing here was ever typeable, so nothing pretends to be. It
-carries an implicit polite live region, silenced one box at a time because a
-screen reader counting every second down is torture (§10). The box itself is a
-CSS border now.
+{-| The one box you can argue with. It reads as the minutes remaining and
+writes as the minutes you want, which is the same contract a kitchen timer
+offers and the same one the old `#min` input had — chuck read this element back
+every tick, which is the entire reason pomo forked chuck (§1b-ii). It is an
+`<input>` because it is genuinely input.
+-}
+dial : Int -> Html Msg
+dial minutes =
+    input
+        [ id "min"
+        , class "min"
+        , type_ "text"
+        , title "25 minutes sitting on a wall, and if one of those minutes should accidentally fall"
+        , value (pad minutes)
+        , onInput SetMinutes
+        ]
+        []
+
+
+{-| `<output>` is "the result of a calculation", which is what these two are —
+neither was ever typeable, so neither pretends to be. It carries an implicit
+polite live region, silenced one box at a time because a screen reader counting
+every second down is torture (§10). The box itself is a CSS border now.
 -}
 digits : String -> String -> Int -> Html Msg
 digits name hint number =

@@ -702,6 +702,137 @@ testing; `curl` confirms connection refused.
 
 ---
 
+## Step 9 — The dial, and Stop meaning stop ✅ DONE
+
+*Mode: fix. Two regressions from the field test, both mine, neither of them
+things `core-requirements.txt` asked for.*
+
+Nothing here is new scope. Both items are behaviour the old app had, that I
+took away on a premise I never checked.
+
+- [x] **Stop pauses; it does not reset.** `Timer` grows `Paused Int` and Start
+      resumes from it.
+- [x] **`#min` goes back to being an `<input>`** and sets the period, so the
+      thing can be a 1-minute timer when you are testing it (Q4, now ruled)
+- [x] The banked pomodoro count survives both of the above
+- [x] Space in the minutes box types a space instead of stopping the timer —
+      in **both** places that know about the space bar (§8)
+- [x] Bump `CACHE_NAME` to `pomo-v5`
+- [x] **Done when:** start, stop, start again continues where it stopped; the
+      dial can be set to 1 and pays out after 60 seconds; the count never lies
+
+`fix: pause on stop, set your own minutes`
+
+### Why these were wrong, with receipts
+
+- **Stop.** `core-requirements.txt` never specifies the Stop button's UX —
+  every hit for "stop" is the space-bar toggle, the Msg list, or sequencing.
+  What it *does* contain is §2's aside, "given the old app has no pause",
+  and that is simply false. `stopTimer()` was `clearInterval` and nothing
+  else; because chuck read its state back out of the DOM every tick, Start
+  picked up from the frozen display. **DOM-as-state gave the old app a pause
+  for free, and I read the absence of the word "pause" as the absence of the
+  behaviour.** Step 2 then recorded the reset as a deliberate improvement.
+- **The minutes box.** Q4 was an open ruling — "keep, or fix at 25?" — and it
+  was still open when Step 7 converted all three boxes to `<output>` on the
+  reasoning that "nothing has read a typed minute since Step 2". True, and
+  beside the point: nothing read one *because I had already stopped writing
+  one*. §10's actual wording is conditional — "*If* minutes stays editable, it
+  stays an input" — and I resolved the condition by deleting the subject.
+
+Ruled in conversation: **keep it editable.** Which also retires the "fixing at
+25 retires pomo's fork of chuck" argument (§1b-ii) — the fork existed to make
+this work, and it works.
+
+### Deviations
+
+- **§11 is broken here, deliberately, and it is the one thing on this page
+  worth arguing about.** §11 lists what is *not* in the model — "no
+  `remaining`, no `minutes`, no `seconds`, no `pomodoros`" — and says that if
+  the shape grows past it, come back to the file rather than push on. The
+  model now carries `period` **and** `pomodoros`: nine fields, eleven
+  messages.
+
+  The reason is not laziness, it is that **the Q4 ruling and §11 cannot both
+  hold.** `pomodoros` was derived as `elapsed // period`. Make `period`
+  something the user can turn, and that expression stops being a fact about
+  your afternoon and becomes a function of where the dial is pointing *now* —
+  dial 25 down to 5 and a derived count silently re-grades ten minutes of
+  sitting there into two pomodoros you never did. §11's own justification for
+  deriving it was that stored values can disagree with each other; these two
+  can't, because they no longer measure the same thing. The clock measures
+  this cycle, the count measures the day.
+
+  The §11-preserving alternative exists and I rejected it: leave the dial
+  editable **only from a fresh Idle timer**, where `elapsed` is 0 and there is
+  no count to corrupt. That keeps seven fields at the price of a box that is
+  dead most of the time — and §10 has already ruled against boxes that lie
+  about being interactive. **Say the word and it flips back.**
+- **The `<form>` is gone**, and this is a bug fix rather than tidying.
+  Re-adding an `<input>` re-armed HTML's implicit submission: one text field,
+  no submit button, no `action` — so **Enter reloaded the page and threw the
+  timer away**, silently, with no query string to show for it. Measured with a
+  trusted key event, not assumed. The fix could have been
+  `preventDefaultOn "submit"` plus a `NoOp` Msg, but a `<form>` with no
+  action, no method, no submit button and no `name` on its only field is not
+  a form — it is a `<div>` that eats your work. The `<fieldset>`s stay, and
+  every measured rectangle on the page is unchanged to the pixel.
+- **Turning the dial to the number it already shows does nothing.** Without
+  that guard every keystroke re-anchored the cycle, so typing a space into the
+  box (the exact thing §8's `preventDefault` narrowing now allows) reset a
+  paused clock from 24:59 to 24:00. Found by probe, not by reasoning.
+- **The dial reads as minutes-remaining and writes as the period**, which are
+  genuinely two different quantities mid-cycle. Setting it restarts the
+  current cycle at the new length, like turning the dial on a physical timer,
+  and leaves the banked count alone. `0` clamps to 1 and `175` clamps to 99,
+  because `modBy 0` is a runtime crash and the box is two characters wide.
+- **The caret jumps to the end of the box when the minutes digit changes**
+  under it, because Elm re-sets `value` and the browser moves the cursor. Once
+  a minute, and typing still accumulates correctly (`1` then `5` reads as 15).
+  Not worth a fix; worth writing down.
+- **`Toggle` and `Start` now match on `Running` and let everything else fall
+  through**, because `Idle` is `Paused 0` with better manners and both resume
+  identically — `Started` shifts the start point back by whatever has already
+  been served.
+- **Banking is plural.** `cycles = elapsed // period` pays out everything owed
+  in one tick, so a backgrounded PWA that comes back four pomodoros later
+  still gets all four. That was free when the count was derived; it costs
+  three lines now, and §1c's catch-up promise is kept.
+
+### Proof
+
+Two harnesses, because one cannot do both jobs. Virtual time for the
+arithmetic; real Chrome over CDP for trusted key events, since synthetic ones
+cannot trigger implicit form submission and would have missed the Enter bug
+entirely.
+
+| Claim | Evidence |
+|---|---|
+| `#min` is an input again, the others are not | `minTag=INPUT secTag=OUTPUT`, `inputs=1 outputs=2 disabled=0` |
+| **Stop freezes** | ran 10s → `24:50`; +4s stopped → still `24:50` |
+| **Start resumes, losing nothing** | +10s more → `24:40`, not `25:00` |
+| Dial takes effect | typed `1` → `01:00` |
+| Pomodoro still pays out | `pomo=01`, `alarms=1`, `quotes=1`, `notify=1` |
+| **Count survives Stop** | stopped after banking → `pomo=01` |
+| Count survives the dial | dial to 1, then 99 → `pomo=01` throughout |
+| `0` clamps to a minute | typed `0` → `01:00` |
+| `99` is the ceiling | typed `175` → `99:00` |
+| A blank box changes nothing | `99:00` before and after |
+| Space outside the box still toggles | `[" ","BODY",true]`, title starts ticking |
+| **Space inside the box does not** | `[" ","INPUT",false]`, clock unmoved |
+| **Enter no longer reloads** | `alive` (was `PAGE RELOADED` with the `<form>`) |
+| Focus survives the repaint | `focused=min`, `sameNode=true` after 3s of ticking |
+| Layout unchanged by dropping `<form>` | `#chker`, `.time`, `#min`, `.buttons` identical to the pixel |
+| Still looks like the screenshot | rendered PNG: three boxes, `+` after Stop |
+
+### Also closed here
+
+- **§10 tomato glyphs: declined.** "The UI is brutally simple, minimal slop so
+  maximally relying on what is in raw HTML." The third box stays a box. That
+  was the last open item of taste in this file.
+
+---
+
 ## Deletion ledger
 
 The scoreboard. Anti-slop means this column only goes down (§0b).
@@ -714,8 +845,9 @@ The scoreboard. Anti-slop means this column only goes down (§0b).
 | **Total** | **537** | **0 left** |
 
 Target: one `Main.elm`, in the shape sketched in §11 — seven fields, seven
-messages, three types. **If it outgrows that, stop and reopen
-`core-requirements.txt` rather than pushing on.**
+messages, three types. **It outgrew that at Step 9** (nine fields, eleven
+messages) and the reasoning is written up there rather than pushed past in
+silence, as §11 asks.
 
 ## Definition of done
 
@@ -732,14 +864,15 @@ messages, three types. **If it outgrows that, stop and reopen
 Defaults above hold unless overruled — none of these block a start.
 
 - §1c — never show `00:00`? (assumed yes) — **shipped as assumed**
-- Q4 — minutes fixed at 25? (assumed yes; retires the chuck fork) — **shipped**
+- Q4 — minutes fixed at 25? **Ruled at Step 9: no, the box is editable.**
+  It sets the period, and it cost §11's seven-field model — see Step 9.
 - §4 — fetch vs bake in? (assumed fetch) — **shipped as fetch**
 - §7 — tabs live? (assumed yes) — **shipped live**
-- §10 — tomato glyphs for the pomodoro count, or leave the third box?
-  The one genuine legibility gap; the only item here that is taste, not
-  mechanism. **Still open — left as a plain box. Nothing depends on it.**
+- §10 — tomato glyphs for the pomodoro count? **Declined at Step 9.** The UI
+  stays brutally simple; the third box stays a box.
 - §8 — the space bar's `preventDefault` lives in `app.js`, because
   `Browser.Events` listeners are passive and Elm is not permitted to cancel
   it. **Wants a ruling; it is a two-line revert** (see Step 7's deviations).
+  Step 9 narrowed it so it leaves the minutes box alone.
 - The apostrophe fix lives in `lines`, not the source `.txt` files (Step 5).
   Ruled "thats fine" in conversation, recorded here so it is not re-litigated.

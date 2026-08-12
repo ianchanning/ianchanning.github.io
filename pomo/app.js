@@ -16,7 +16,7 @@ if ("Notification" in window) {
 // `Browser.Events` listeners are registered `{ passive: true }`, so Elm cannot
 // cancel this itself. Nothing is read, nothing is remembered.
 document.addEventListener("keydown", (event) => {
-  if (event.key === " ") {
+  if (event.key === " " && event.target.tagName !== "INPUT") {
     event.preventDefault();
   }
 });
