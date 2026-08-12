@@ -7722,7 +7722,7 @@ var $author$project$Main$dial = function (minutes) {
 			[
 				$elm$html$Html$Attributes$id('min'),
 				$elm$html$Html$Attributes$class('min'),
-				$elm$html$Html$Attributes$type_('text'),
+				$elm$html$Html$Attributes$type_('number'),
 				$elm$html$Html$Attributes$title('25 minutes sitting on a wall, and if one of those minutes should accidentally fall'),
 				$elm$html$Html$Attributes$value(
 				$author$project$Main$pad(minutes)),

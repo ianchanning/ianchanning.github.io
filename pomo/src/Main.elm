@@ -700,7 +700,7 @@ dial minutes =
     input
         [ id "min"
         , class "min"
-        , type_ "text"
+        , type_ "number"
         , title "25 minutes sitting on a wall, and if one of those minutes should accidentally fall"
         , value (pad minutes)
         , onInput SetMinutes

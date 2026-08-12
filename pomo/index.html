@@ -145,12 +145,19 @@
       #min,
       #sec,
       #pomo {
+        appearance: textfield;
         border: 1px solid #767676;
+        border-radius: 2px;
         display: inline-block;
         font-size: 1rem;
         line-height: 1.5;
         padding: 0.5rem 1rem;
         width: 2ch;
+      }
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
       }
 
       /* Elm emits no whitespace between elements, so the boxes would otherwise
