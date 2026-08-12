@@ -906,4 +906,6 @@ user and to assistive tech ... seconds and pomodoro count become `<output>` or
 plain text" — and in the same breath requires the boxes to survive it: "the
 *look* (boxed digits) must survive the change". The standing ruling and the
 requirements agree, because §10 is naming the bug that the "unless it's
-buggered" clause exists for. Nothing to overrule.
+buggered" clause exists for. Endorsed in conversation as an upgrade —
+"it follows the base rule of working with the core HTML". Nothing to overrule,
+and no revert wanted.
