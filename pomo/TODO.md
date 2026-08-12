@@ -837,7 +837,10 @@ entirely.
   functionality, UX and UI of the original is the source truth unless it's
   buggered in some way." Which is what settles §11 above — the original kept
   its pomodoro count across a Stop, so the port does too, whatever that costs
-  the field count. Every deviation from here on wants a bug to point at.
+  the field count. Every deviation from here on wants a bug to point at, and
+  §10 is largely a list of exactly that: the places the requirements already
+  named the bug (a disabled input that lies, a missing `aria-live`, a focus
+  ring taken out by a stray commit).
 
 ---
 
@@ -893,10 +896,14 @@ buggered. Deviating wants a bug to point at, not a preference.
   `Browser.Events` listeners are passive and Elm is not permitted to cancel
   it. **Wants a ruling; it is a two-line revert** (see Step 7's deviations).
   Step 9 narrowed it so it leaves the minutes box alone.
-- §10 — `#sec` and `#pomo` are `<output>`, where the original had
-  `<input disabled readonly>`. Same box, same border, same width; `<output>`
-  is the read-only element and does not tell a screen reader it is a
-  disabled text field. **The one place the port does not match the original
-  tag-for-tag, and it is there because §10 asked for it.** Two-line revert.
 - The apostrophe fix lives in `lines`, not the source `.txt` files (Step 5).
   Ruled "thats fine" in conversation, recorded here so it is not re-litigated.
+
+**Not a ruling, and briefly mis-filed as one:** `#sec` and `#pomo` being
+`<output>` where the original had `<input disabled readonly>`. §10 asks for
+this in as many words — "a text input that cannot be typed in is a lie to the
+user and to assistive tech ... seconds and pomodoro count become `<output>` or
+plain text" — and in the same breath requires the boxes to survive it: "the
+*look* (boxed digits) must survive the change". The standing ruling and the
+requirements agree, because §10 is naming the bug that the "unless it's
+buggered" clause exists for. Nothing to overrule.
