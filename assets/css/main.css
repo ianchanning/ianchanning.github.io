@@ -10,8 +10,7 @@
    Custom styles: imports
    ========================================================================== */
 
-@import url(../goudy-bookletter-1911-webfonts/stylesheet.css);
-@import url(../theleagueof-raleway-webfonts/stylesheet.css);
+/* Loaded directly via <link> in index.htm to avoid @import waterfall */
 
 /* ==========================================================================
    Base styles: opinionated defaults
@@ -166,8 +165,8 @@ li {line-height: 30px; padding: 6px 0 0 0;}
 
 .footer {background:#fff; clear: both;}
 .footer p {padding:4px 0;margin: 0; color: #666; font-size:13px; font-family:helvetica, sans-serif; letter-spacing:4px}
-.footer a {color: #c0c0c0;text-decoration: none;}
-.footer a:hover {color: #999;text-decoration: none;}
+.footer a {color: #666;text-decoration: none;}
+.footer a:hover {color: #333;text-decoration: none;}
 
 
 #arc {float: right; width:530px; overflow: hidden; margin-top:0px; margin-left:14px; margin-right:14px; margin-bottom:24px;}
