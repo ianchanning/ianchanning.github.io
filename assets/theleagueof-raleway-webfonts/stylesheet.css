@@ -9,4 +9,5 @@
          url('raleway_thin-webfont.svg#league_gothicregular') format('svg'); /* Legacy iOS */
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
