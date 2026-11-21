@@ -28,41 +28,7 @@ blockquote { margin: 8px 16px; }
 pre, code, input, textarea, select { font-family: monospace; font-size: 10pt; }
 pre { overflow-x: auto; }
 header, nav { background: #ff6600; padding: 4px 6px; }
-footer { border-top: 2px solid #ff6600; margin-top: 16px; padding-top: 8px; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border-top: 1px solid #e6e6df; padding: 4px 6px; text-align: left; vertical-align: top; }
-fieldset { border: none; padding: 0; margin: 0; }
-label { 
-  display: block;
-  margin-top: 8px; 
-  text-transform: lowercase;
-}
-input, textarea, select {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 480px;
-  padding: 3px 4px;
-  border: 1px solid #828282;
-  border-radius: 4px;
-  background: #fff;
-  color: #000;
-  text-transform: lowercase;
-}
-button, input[type="submit"], input[type="reset"] {
-  margin-top: 8px;
-  width: auto;
-  font-family: Verdana, Geneva, sans-serif;
-  border: 1px solid #828282;
-  border-radius: 4px;
-  background: #efefef;
-  color: #000;
-  padding: 2px 8px;
-  cursor: pointer;
-  text-transform: lowercase;
-}
-:disabled { background: #e6e6df; color: #828282; }
-label input { width: auto; border: none; }
-      
+footer { border-top: 2px solid #ff6600; margin-top: 16px; padding-top: 8px; } 
     </style>
     <link rel="stylesheet" href="bootstrap-button.css">
   </head>
@@ -133,6 +99,15 @@ label input { width: auto; border: none; }
         </div>
       </div>
 
+
+<nav>
+  <ol>
+    <li><a href="#anchor" class="unstyled">Home</a></li>
+    <li><a href="#anchor" class="unstyled">Projects</a></li>
+    <li><a href="#anchor" class="unstyled">Oat Docs</a></li>
+    <li><a href="#anchor" class="unstyled" aria-current="page"><strong>Selected</strong></a></li>
+  </ol>
+</nav>
       <!-- Typography
       ================================================== -->
       <div>
@@ -210,6 +185,14 @@ label input { width: auto; border: none; }
               </blockquote>
             </div>
           </div>
+        </div>
+        <div>
+<span class="badge">Default</span>
+<span class="badge" data-variant="secondary">Secondary</span>
+<span class="badge outline">Outline</span>
+<span class="badge" data-variant="success">Success</span>
+<span class="badge" data-variant="warning">Warning</span>
+<span class="badge" data-variant="danger">Danger</span>
         </div>
       </div>
 
