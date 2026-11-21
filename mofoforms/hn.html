@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <style type="text/css">
-      html { background: #fff; }
+       html { background: #fff; }
 body {
   background: #f6f6ef;
   color: #000;
@@ -22,13 +22,62 @@ p { margin: 8px 0; }
 a { color: #000; text-decoration: none; }
 a:visited { color: #828282; }
 a:hover, p a { text-decoration: underline; }
+a.unstyled:hover { text-decoration: none; }
 small, blockquote, legend, label, footer { color: #828282; }
 small, footer { font-size: 8pt; }
 blockquote { margin: 8px 16px; }
 pre, code, input, textarea, select { font-family: monospace; font-size: 10pt; }
 pre { overflow-x: auto; }
-header, nav { background: #ff6600; padding: 4px 6px; }
-footer { border-top: 2px solid #ff6600; margin-top: 16px; padding-top: 8px; } 
+header, nav { background: #ff6600; padding: 4px 8px; }
+nav ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+nav li + li::before { content: "|"; margin-right: 6px; }
+nav a, nav a:visited { color: #000; }
+nav a[aria-current="page"] { color: #fff; }
+footer { border-top: 2px solid #ff6600; margin-top: 16px; padding-top: 8px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-top: 1px solid #e6e6df; padding: 4px 6px; text-align: left; vertical-align: top; }
+fieldset { border: none; padding: 0; margin: 0; }
+label { display: block; margin-top: 8px; text-transform: lowercase; }
+input, textarea, select {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  padding: 3px 4px;
+  border: 1px solid #828282;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+}
+button, input[type="submit"], input[type="reset"] {
+  margin-top: 8px;
+  width: auto;
+  font-family: Verdana, Geneva, sans-serif;
+  border: 1px solid #828282;
+  border-radius: 4px;
+  background: #efefef;
+  color: #000;
+  padding: 2px 8px;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+:disabled { background: #e6e6df; color: #828282; }
+label input { width: auto; border: none; }
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 8pt;
+  font-weight: bold;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: #ff6600;
+  color: #000;
+}
+.badge.outline { background: transparent; border-color: #828282; }
+.badge[data-variant="secondary"] { background: #828282; color: #fff; }
+.badge[data-variant="success"] { background: #009966; color: #fff; }
+.badge[data-variant="warning"] { background: #f0b400; color: #000; }
+.badge[data-variant="danger"] { background: #cc2929; color: #fff; }
     </style>
     <link rel="stylesheet" href="bootstrap-button.css">
   </head>
